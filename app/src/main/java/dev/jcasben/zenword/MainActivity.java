@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 
 import java.util.Random;
 
@@ -59,9 +61,75 @@ public class MainActivity extends AppCompatActivity {
         return "castaña".toUpperCase();
     }
 
-    private void setPossibleSolutionWordsTextV(){
+    public TextView[] generateRowTextViews (int guide, int letters) {
+        TextView[] line = new TextView[letters];
+        ConstraintLayout main = findViewById(R.id.main);
+        for (int i = 0; i < letters; i++) {
+            TextView x = new TextView(this);
+            x.setId(View.generateViewId());
+            x.setText("");
+            x.setBackgroundColor(Color.DKGRAY);
+            x.setTextColor(Color.WHITE);
+            line[i] = x;
+            main.addView(x);
+        }
+        int ample = (widthDisplay/7) - (5*20);
+        ConstraintSet constraintSet = new ConstraintSet();
+        for (int i = 0; i < letters; i++) {
+            constraintSet.connect(
+                    line[i].getId(),
+                    ConstraintSet.TOP,
+                    guide,
+                    ConstraintSet.BOTTOM,
+                    10
+            );
 
+            if (i == 0){
+                constraintSet.connect(
+                        line[i].getId(),
+                        ConstraintSet.START,
+                        ConstraintSet.PARENT_ID,
+                        ConstraintSet.END,
+                        ample*(7-letters)/2
+                );
+            }
+            else {
+                constraintSet.connect(
+                        line[i].getId(),
+                        ConstraintSet.START,
+                        line[i-1].getId(),
+                        ConstraintSet.END,
+                        5
+                );
+            }
+
+            if (i == letters-1) {
+                constraintSet.connect(
+                        line[i].getId(),
+                        ConstraintSet.END,
+                        ConstraintSet.PARENT_ID,
+                        ConstraintSet.START,
+                        ample*(7-letters)/2
+                );
+            }
+            else  {
+                constraintSet.connect(
+                        line[i].getId(),
+                        ConstraintSet.END,
+                        line[i+1].getId(),
+                        ConstraintSet.START,
+                        5
+                );
+            }
+
+            constraintSet.constrainWidth(line[i].getId(),ample);
+            constraintSet.constrainHeight(line[i].getId(),ample);
+            constraintSet.applyTo(main);
+        }
+
+        return line;
     }
+
 
     //name of the buttons: l0, l1, l2, l3, l4, l5, l6
     private void setCircleButtonLetters(){
