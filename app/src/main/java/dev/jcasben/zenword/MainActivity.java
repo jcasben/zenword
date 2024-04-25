@@ -1,5 +1,7 @@
 package dev.jcasben.zenword;
 
+import android.graphics.Color;
+import android.util.DisplayMetrics;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
@@ -15,18 +17,26 @@ public class MainActivity extends AppCompatActivity {
     String referenceWord;
     int[] ids ={R.id.buttonL0, R.id.buttonL1, R.id.buttonL2, R.id.buttonL3,
             R.id.buttonL4, R.id.buttonL5, R.id.buttonL6};
-
+    int widthDisplay;
+    int heightDisplay;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics ) ;
+        widthDisplay = metrics.widthPixels;
+        heightDisplay = metrics.heightPixels;
         // Get reference word
         referenceWord = getReferenceWord();
-        // Generate the buttons of the possible solution words.
-        setPossibleSolutionWordsTextV();
         // Generate buttons of the circle
         setCircleButtonLetters();
         suffle(null);
+        generateRowTextViews(R.id.guideW0, 7);
+        generateRowTextViews(R.id.guideW1, 7);
+        generateRowTextViews(R.id.guideW2, 7);
+        generateRowTextViews(R.id.guideW3, 7);
+        generateRowTextViews(R.id.guideW4, 7);
     }
 
 
