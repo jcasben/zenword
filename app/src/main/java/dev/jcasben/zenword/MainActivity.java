@@ -12,15 +12,18 @@ import android.view.View;
 import android.widget.Button;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import dev.jcasben.zenword.mappings.UnsortedArrayMapping;
 
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
-    String referenceWord;
-    int[] ids ={R.id.buttonL0, R.id.buttonL1, R.id.buttonL2, R.id.buttonL3,
+    private String referenceWord;
+    private int[] ids ={R.id.buttonL0, R.id.buttonL1, R.id.buttonL2, R.id.buttonL3,
             R.id.buttonL4, R.id.buttonL5, R.id.buttonL6};
-    int widthDisplay;
-    int heightDisplay;
+    private int widthDisplay;
+    private int heightDisplay;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             line[i] = x;
             main.addView(x);
         }
-        int ample = (widthDisplay/7) - (5*20);
+        int whidth = (widthDisplay/7) - (int)(0.05*widthDisplay);
         ConstraintSet constraintSet = new ConstraintSet();
         for (int i = 0; i < letters; i++) {
             constraintSet.connect(
@@ -90,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                         ConstraintSet.START,
                         ConstraintSet.PARENT_ID,
                         ConstraintSet.END,
-                        ample*(7-letters)/2
+                        whidth*(7-letters)/2
                 );
             }
             else {
@@ -109,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
                         ConstraintSet.END,
                         ConstraintSet.PARENT_ID,
                         ConstraintSet.START,
-                        ample*(7-letters)/2
+                        whidth*(7-letters)/2
                 );
             }
             else  {
@@ -122,8 +125,8 @@ public class MainActivity extends AppCompatActivity {
                 );
             }
 
-            constraintSet.constrainWidth(line[i].getId(),ample);
-            constraintSet.constrainHeight(line[i].getId(),ample);
+            constraintSet.constrainWidth(line[i].getId(),whidth);
+            constraintSet.constrainHeight(line[i].getId(),whidth);
             constraintSet.applyTo(main);
         }
 
@@ -147,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
 
     // onClick random button function
     public void suffle (View view) {
+        clear(null);
         Random ran = new Random();
         char[] word = referenceWord.toCharArray();
         // suffle the word
@@ -185,5 +189,26 @@ public class MainActivity extends AppCompatActivity {
         //clear text view
         TextView tv = findViewById(R.id.textVWordFormation);
         tv.setText("");
+    }
+
+
+    private boolean isSolutionWord(String word1, String word2){
+        UnsortedArrayMapping<Character,Integer> catalogue = new UnsortedArrayMapping<>(word1.length());
+        // generate the catalogue of word 1
+        for (int i = 0; i < word1.length(); i++) {
+            Integer v = catalogue.put(word1.charAt(i), 1);
+            if (v != null) {
+                catalogue.put(word1.charAt(i), v+1);
+            }
+        }
+
+        // check if word2 could be generated with the catalogue
+        for (int i = 0; i < word2.length(); i++) {
+            Integer value = catalogue.get(word2.charAt(i));
+            if (value == null || value == 0) return false;
+            catalogue.put(word2.charAt(i), value - 1);
+        }
+        // if the program arrives here is because word 2 can be formed with the letters of word1
+        return true;
     }
 }
