@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics ) ;
+        getWindowManager().getDefaultDisplay().getMetrics(metrics) ;
         widthDisplay = metrics.widthPixels;
         heightDisplay = metrics.heightPixels;
         // Get reference word
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
             TextView x = new TextView(this);
             x.setId(View.generateViewId());
             x.setText("");
-            x.setBackgroundColor(Color.DKGRAY);
+            x.setBackground(getDrawable(R.drawable.square_letter_yellow));
             x.setTextColor(Color.WHITE);
             line[i] = x;
             main.addView(x);
