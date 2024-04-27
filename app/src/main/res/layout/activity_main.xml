@@ -4,9 +4,9 @@
                                                    xmlns:tools="http://schemas.android.com/tools"
                                                    android:layout_width="match_parent"
                                                    android:layout_height="match_parent"
-                                                   android:background="@drawable/background1"
+                                                   android:background="@drawable/background2"
                                                    tools:context=".MainActivity"
-                                                    android:id="@+id/main">
+                                                   android:id="@+id/main">
 
     <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideCorrectWords"
@@ -153,8 +153,8 @@
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintTop_toTopOf="@+id/guideBButtons"
             app:layout_constraintVertical_bias="0.0"
-            app:srcCompat="@drawable/circulo"
-            app:layout_constraintEnd_toStartOf="@+id/guideline" app:layout_constraintStart_toStartOf="@+id/guideline2"/>
+            app:srcCompat="@drawable/circle_yellow"
+            app:layout_constraintStart_toStartOf="@+id/guideline2" app:layout_constraintEnd_toStartOf="@+id/guideline"/>
     <Button
             android:id="@+id/buttonShuffle"
             android:layout_width="0dp"
@@ -194,7 +194,7 @@
             app:layout_constraintEnd_toStartOf="@+id/guideline4"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/guideline7"
-            tools:text="0"/>
+            tools:text="0" android:textColor="#FFFEFE"/>
 
     <Button
             android:id="@+id/buttonReset"
@@ -389,16 +389,16 @@
             app:layout_constraintBottom_toTopOf="@+id/guideline6"
             app:layout_constraintEnd_toStartOf="@+id/guideline8"
             app:layout_constraintStart_toStartOf="@+id/guideline9"
-            app:layout_constraintTop_toTopOf="@+id/guideline10" android:fontFamily="sans-serif-condensed"/>
+            app:layout_constraintTop_toTopOf="@+id/guideline10" android:fontFamily="sans-serif-medium"/>
     <androidx.constraintlayout.widget.Guideline
             android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" android:id="@+id/guideline"
-            app:layout_constraintGuide_percent="0.86"/>
+            app:layout_constraintGuide_percent="0.9"/>
     <androidx.constraintlayout.widget.Guideline
             android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" android:id="@+id/guideline2"
-            app:layout_constraintGuide_percent="0.14"/>
+            app:layout_constraintGuide_percent="0.1"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
