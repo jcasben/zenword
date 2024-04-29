@@ -3,6 +3,7 @@ package dev.jcasben.zenword;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -12,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
+
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import dev.jcasben.zenword.mappings.UnsortedArrayMapping;
@@ -77,11 +80,16 @@ public class MainActivity extends AppCompatActivity {
         // Generate buttons of the circle
         setCircleButtonLetters();
         suffle(null);
-        generateRowTextViews(R.id.guideW0, 7);
+
+
+
+        // prueba
+        generateRowTextViews(R.id.guideW0, 3);
         generateRowTextViews(R.id.guideW1, 7);
         generateRowTextViews(R.id.guideW2, 7);
         generateRowTextViews(R.id.guideW3, 7);
         generateRowTextViews(R.id.guideW4, 7);
+        //showWord("mec", 0);
     }
 
 
@@ -262,5 +270,58 @@ public class MainActivity extends AppCompatActivity {
         send.setBackgroundColor(buttonColors.get(color)[0]);
         TextView textView = findViewById(R.id.textVWordFormation);
         textView.setBackgroundColor(buttonColors.get(color)[1]);
+    }
+
+    private void showWord(String word, int pos) {
+        // TODO
+        ConstraintLayout layout = findViewById(R.id.main);
+        ViewGroup group = (ViewGroup) layout;
+        TextView aux = (TextView) group.getChildAt(1);
+      //  aux.setText(word.charAt(0));
+    }
+
+    private void showFirstLetter(String word, int pos) {
+
+    }
+
+    private void showMessage(String message, boolean longTime) {
+        int duration;
+        if (longTime) duration = Toast.LENGTH_LONG;
+        else duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(getApplicationContext(), message, duration);
+        toast.show();
+    }
+
+    private void onClickRestart(View view) {
+        /*
+        En aquest apartat s’ha d’implementar la funcionalitat del bot´o reiniciar, que
+        ha de:
+            • Esborrar de la pantalla les caselles de les lletres amagades actuals.
+            • Canviar el color dels elements de la pantalla (cercle i lletres amagades).
+            • Mostrar les noves paraules amagades.
+            • Reiniciar totes les variables necess`aries per comen¸car una nova partida.
+        Pensau que, de moment, no podem reiniciar totes les coses (encara no tenim
+        les paraules i no es pot determinar quantes ni quines solucions tenim, per`o
+        ho podem simular amb valors constants).
+         */
+    }
+
+    private void enableViews(int parent) {
+        ViewGroup group = (ViewGroup) findViewById(R.id.main);
+        for (int i = 0; i < group.getChildCount(); i++) {
+            View v = group.getChildAt(i);
+            v.setEnabled(true);
+        }
+    }
+
+    private void disableViews(int parent) {
+        int bonusId = R.id.buttonBonus;
+        int resetId = R.id.buttonReset;
+        ViewGroup group = (ViewGroup) findViewById(R.id.main);
+        for (int i = 0; i < group.getChildCount(); i++) {
+            View v = group.getChildAt(i);
+            if ((v.getId() != bonusId) && (v.getId() != resetId)) v.setEnabled(false);
+        }
     }
 }

@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ZenWord"
+rootProject.name = "zenword"
 include(":app")
