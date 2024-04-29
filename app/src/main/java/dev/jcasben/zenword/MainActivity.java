@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Declaration of colors and drawables for UI
         drawableColors.put("YELLOW", new Drawable[]{
                 getDrawable(R.drawable.circle_yellow),
                 getDrawable(R.drawable.square_letter_yellow)
@@ -101,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getReferenceWord(){
-        return "castaña".toUpperCase();
+        return "coche".toUpperCase();
     }
 
     public TextView[] generateRowTextViews (int guide, int letters) {
