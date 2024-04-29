@@ -1,7 +1,9 @@
 package dev.jcasben.zenword;
 
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
@@ -13,21 +15,59 @@ import android.widget.Button;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import dev.jcasben.zenword.mappings.UnsortedArrayMapping;
+import dev.jcasben.zenword.sets.UnsortedArraySet;
 
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
     private String referenceWord;
-    private int[] ids ={R.id.buttonL0, R.id.buttonL1, R.id.buttonL2, R.id.buttonL3,
+    private final int[] ids ={R.id.buttonL0, R.id.buttonL1, R.id.buttonL2, R.id.buttonL3,
             R.id.buttonL4, R.id.buttonL5, R.id.buttonL6};
+    private final UnsortedArrayMapping<String, Drawable[]> drawableColors =
+            new UnsortedArrayMapping<>(4);
+    private final UnsortedArrayMapping<String, int[]> buttonColors =
+             new UnsortedArrayMapping<>(4);
+    private Drawable letterBackground;
     private int widthDisplay;
     private int heightDisplay;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        drawableColors.put("YELLOW", new Drawable[]{
+                getDrawable(R.drawable.circle_yellow),
+                getDrawable(R.drawable.square_letter_yellow)
+        });
+        buttonColors.put("YELLOW", new int[]{
+                0xBFFFF281, 0x79FFF281
+        });
+
+        drawableColors.put("GREEN", new Drawable[]{
+                getDrawable(R.drawable.circle_green),
+                getDrawable(R.drawable.square_letter_green)
+        });
+        buttonColors.put("GREEN", new int[]{
+                0xBF89FF81, 0x7889FF81
+        });
+
+        drawableColors.put("RED", new Drawable[]{
+                getDrawable(R.drawable.circle_red),
+                getDrawable(R.drawable.square_letter_red)
+        });
+        buttonColors.put("RED", new int[]{
+                0xBFFF8181, 0x78FF8181
+        });
+
+        drawableColors.put("ORANGE", new Drawable[]{
+                getDrawable(R.drawable.circle_orange),
+                getDrawable(R.drawable.square_letter_orange)
+        });
+        buttonColors.put("ORANGE", new int[]{
+                0xBFFF9800, 0x78FF9800
+        });
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setUIColor("YELLOW");
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics) ;
         widthDisplay = metrics.widthPixels;
@@ -71,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             TextView x = new TextView(this);
             x.setId(View.generateViewId());
             x.setText("");
-            x.setBackground(getDrawable(R.drawable.square_letter_yellow));
+            x.setBackground(letterBackground);
             x.setTextColor(Color.WHITE);
             line[i] = x;
             main.addView(x);
@@ -210,5 +250,17 @@ public class MainActivity extends AppCompatActivity {
         }
         // if the program arrives here is because word 2 can be formed with the letters of word1
         return true;
+    }
+
+    private void setUIColor(String color) {
+        ImageView circle = findViewById(R.id.circleView);
+        circle.setImageDrawable(drawableColors.get(color)[0]);
+        letterBackground = drawableColors.get(color)[1];
+        Button clear = findViewById(R.id.buttonClear);
+        clear.setBackgroundColor(buttonColors.get(color)[0]);
+        Button send = findViewById(R.id.buttonSend);
+        send.setBackgroundColor(buttonColors.get(color)[0]);
+        TextView textView = findViewById(R.id.textVWordFormation);
+        textView.setBackgroundColor(buttonColors.get(color)[1]);
     }
 }
