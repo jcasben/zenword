@@ -18,7 +18,6 @@ import android.widget.Toast;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import dev.jcasben.zenword.mappings.UnsortedArrayMapping;
-import dev.jcasben.zenword.sets.UnsortedArraySet;
 
 import java.util.Random;
 
@@ -30,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
             new UnsortedArrayMapping<>(4);
     private final UnsortedArrayMapping<String, int[]> buttonColors =
              new UnsortedArrayMapping<>(4);
+    String [] colors = {"YELLOW", "GREEN", "RED", "ORANGE"};
     private Drawable letterBackground;
     private int widthDisplay;
     private int heightDisplay;
@@ -299,7 +299,6 @@ public class MainActivity extends AppCompatActivity {
         En aquest apartat s’ha d’implementar la funcionalitat del bot´o reiniciar, que
         ha de:
             • Esborrar de la pantalla les caselles de les lletres amagades actuals.
-            • Canviar el color dels elements de la pantalla (cercle i lletres amagades).
             • Mostrar les noves paraules amagades.
             • Reiniciar totes les variables necess`aries per comen¸car una nova partida.
         Pensau que, de moment, no podem reiniciar totes les coses (encara no tenim
@@ -324,5 +323,10 @@ public class MainActivity extends AppCompatActivity {
             View v = group.getChildAt(i);
             if ((v.getId() != bonusId) && (v.getId() != resetId)) v.setEnabled(false);
         }
+    }
+
+    private String pickRandomColor() {
+        Random ran = new Random();
+        return colors[ran.nextInt(4)];
     }
 }
