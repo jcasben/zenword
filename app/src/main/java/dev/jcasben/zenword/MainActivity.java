@@ -1,6 +1,7 @@
 package dev.jcasben.zenword;
 
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.view.ViewGroup;
@@ -25,14 +26,20 @@ public class MainActivity extends AppCompatActivity {
     private String referenceWord;
     private final int[] ids ={R.id.buttonL0, R.id.buttonL1, R.id.buttonL2, R.id.buttonL3,
             R.id.buttonL4, R.id.buttonL5, R.id.buttonL6};
+    private final int[] guidesIds = {R.id.guideW0, R.id.guideW1, R.id.guideW2,
+            R.id.guideW3, R.id.guideW4};
     private final UnsortedArrayMapping<String, Drawable[]> drawableColors =
             new UnsortedArrayMapping<>(4);
     private final UnsortedArrayMapping<String, int[]> buttonColors =
              new UnsortedArrayMapping<>(4);
+    private int[][] letterTVId;
     String [] colors = {"YELLOW", "GREEN", "RED", "ORANGE"};
     private Drawable letterBackground;
     private int widthDisplay;
     private int heightDisplay;
+
+    // variable temporal hasta introducir mejoras.
+    private int[] lenghtWord = {3,7,7,7,7};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,14 +90,18 @@ public class MainActivity extends AppCompatActivity {
         suffle(null);
 
 
-
+        // inicializar la matriz para poder guardar los id de los tv
+        letterTVId = new int[5][];
+        for (int i = 0; i < letterTVId.length; i++) {
+            letterTVId[i] = new int[lenghtWord[i]];
+        }
         // prueba
-        generateRowTextViews(R.id.guideW0, 3);
-        generateRowTextViews(R.id.guideW1, 7);
-        generateRowTextViews(R.id.guideW2, 7);
-        generateRowTextViews(R.id.guideW3, 7);
-        generateRowTextViews(R.id.guideW4, 7);
-        //showWord("mec", 0);
+        for (int i = 0; i < guidesIds.length; i++) {
+            generateRowTextViews(guidesIds[i], lenghtWord[i], i);
+        }
+
+        showWord("mec", 0);
+        showFirstLetter("castaña",1);
     }
 
 
@@ -113,15 +124,22 @@ public class MainActivity extends AppCompatActivity {
         return "coche".toUpperCase();
     }
 
-    public TextView[] generateRowTextViews (int guide, int letters) {
+    public TextView[] generateRowTextViews (int guide, int letters, int numline) {
         TextView[] line = new TextView[letters];
         ConstraintLayout main = findViewById(R.id.main);
         for (int i = 0; i < letters; i++) {
             TextView x = new TextView(this);
-            x.setId(View.generateViewId());
+            int id = View.generateViewId();
+            //save id
+            letterTVId[numline][i] = id;
+            x.setId(id);
             x.setText("");
             x.setBackground(letterBackground);
             x.setTextColor(Color.WHITE);
+            x.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            x.setTextSize(24);
+            x.setTypeface(null, Typeface.BOLD);
+            x.setTextColor(Color.BLACK);
             line[i] = x;
             main.addView(x);
         }
@@ -274,15 +292,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showWord(String word, int pos) {
-        // TODO
-        ConstraintLayout layout = findViewById(R.id.main);
-        ViewGroup group = (ViewGroup) layout;
-        TextView aux = (TextView) group.getChildAt(1);
-      //  aux.setText(word.charAt(0));
+        for (int i = 0; i < letterTVId[pos].length; i++) {
+            TextView textView = findViewById(letterTVId[pos][i]);
+            textView.setText(String.format("%s", word.charAt(i)).toUpperCase());
+        }
     }
 
     private void showFirstLetter(String word, int pos) {
-
+        TextView textView = findViewById(letterTVId[pos][0]);
+        textView.setText(String.format("%s", word.charAt(0)).toLowerCase());
     }
 
     private void showMessage(String message, boolean longTime) {
