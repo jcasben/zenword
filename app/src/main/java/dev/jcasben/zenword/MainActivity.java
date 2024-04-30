@@ -294,7 +294,8 @@ public class MainActivity extends AppCompatActivity {
         toast.show();
     }
 
-    private void onClickRestart(View view) {
+    public void onClickRestart(View view) {
+        setUIColor(pickRandomColor());
         /*
         En aquest apartat s’ha d’implementar la funcionalitat del bot´o reiniciar, que
         ha de:
