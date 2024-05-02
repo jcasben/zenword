@@ -1,5 +1,6 @@
 package dev.jcasben.zenword;
 
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -20,6 +21,11 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import dev.jcasben.zenword.mappings.UnsortedArrayMapping;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashSet;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
@@ -33,7 +39,10 @@ public class MainActivity extends AppCompatActivity {
     private final UnsortedArrayMapping<String, int[]> buttonColors =
              new UnsortedArrayMapping<>(4);
     private int[][] letterTVId;
-    String [] colors = {"YELLOW", "GREEN", "RED", "ORANGE"};
+    private final String [] colors = {"YELLOW", "GREEN", "RED", "ORANGE"};
+
+    private final UnsortedArrayMapping<Integer, HashSet<String>> words = new UnsortedArrayMapping<>(5);
+
     private Drawable letterBackground;
     private int widthDisplay;
     private int heightDisplay;
@@ -44,37 +53,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Declaration of colors and drawables for UI
-        drawableColors.put("YELLOW", new Drawable[]{
-                getDrawable(R.drawable.circle_yellow),
-                getDrawable(R.drawable.square_letter_yellow)
-        });
-        buttonColors.put("YELLOW", new int[]{
-                0xBFFFF281, 0x79FFF281
-        });
-
-        drawableColors.put("GREEN", new Drawable[]{
-                getDrawable(R.drawable.circle_green),
-                getDrawable(R.drawable.square_letter_green)
-        });
-        buttonColors.put("GREEN", new int[]{
-                0xBF89FF81, 0x7889FF81
-        });
-
-        drawableColors.put("RED", new Drawable[]{
-                getDrawable(R.drawable.circle_red),
-                getDrawable(R.drawable.square_letter_red)
-        });
-        buttonColors.put("RED", new int[]{
-                0xBFFF8181, 0x78FF8181
-        });
-
-        drawableColors.put("ORANGE", new Drawable[]{
-                getDrawable(R.drawable.circle_orange),
-                getDrawable(R.drawable.square_letter_orange)
-        });
-        buttonColors.put("ORANGE", new int[]{
-                0xBFFF9800, 0x78FF9800
-        });
+        initUIColorsAndDrawables();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -103,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
         showWord("mec", 0);
         showFirstLetter("castaña",1);
     }
+
 
 
     // onClick letter buttons function
@@ -347,5 +327,65 @@ public class MainActivity extends AppCompatActivity {
     private String pickRandomColor() {
         Random ran = new Random();
         return colors[ran.nextInt(4)];
+    }
+
+    private String pickWord() {
+        // TODO: implementar
+
+        return "";
+    }
+
+    private void initWords() {
+        for (int i = 3; i < 8; i++) {
+            words.put(i, new HashSet<>());
+        }
+        try (InputStream inputStream = getResources().openRawResource(R.raw.paraules)) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            String line = reader.readLine();
+            while (line != null) {
+                int lengthWord = line.substring(line.indexOf(';') + 1).length();
+                if (lengthWord >= 3 && lengthWord <= 7 ) {
+                    words.get(lengthWord).add(line);
+                }
+                line = reader.readLine();
+            }
+            reader.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void initUIColorsAndDrawables() {
+        drawableColors.put("YELLOW", new Drawable[]{
+                getDrawable(R.drawable.circle_yellow),
+                getDrawable(R.drawable.square_letter_yellow)
+        });
+        buttonColors.put("YELLOW", new int[]{
+                0xBFFFF281, 0x79FFF281
+        });
+
+        drawableColors.put("GREEN", new Drawable[]{
+                getDrawable(R.drawable.circle_green),
+                getDrawable(R.drawable.square_letter_green)
+        });
+        buttonColors.put("GREEN", new int[]{
+                0xBF89FF81, 0x7889FF81
+        });
+
+        drawableColors.put("RED", new Drawable[]{
+                getDrawable(R.drawable.circle_red),
+                getDrawable(R.drawable.square_letter_red)
+        });
+        buttonColors.put("RED", new int[]{
+                0xBFFF8181, 0x78FF8181
+        });
+
+        drawableColors.put("ORANGE", new Drawable[]{
+                getDrawable(R.drawable.circle_orange),
+                getDrawable(R.drawable.square_letter_orange)
+        });
+        buttonColors.put("ORANGE", new int[]{
+                0xBFFF9800, 0x78FF9800
+        });
     }
 }
