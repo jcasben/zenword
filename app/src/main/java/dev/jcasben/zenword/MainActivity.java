@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
+
     private String referenceWord;
     private final int[] ids ={R.id.buttonL0, R.id.buttonL1, R.id.buttonL2, R.id.buttonL3,
             R.id.buttonL4, R.id.buttonL5, R.id.buttonL6};
@@ -69,16 +70,18 @@ public class MainActivity extends AppCompatActivity {
         suffle(null);
 
 
-        // inicializar la matriz para poder guardar los id de los tv
+        // inicializar la matriz de letras para poder guardar los id de los tv
         letterTVId = new int[5][];
         for (int i = 0; i < letterTVId.length; i++) {
             letterTVId[i] = new int[lenghtWord[i]];
         }
-        // prueba
+        // generar las filas de las palabras
         for (int i = 0; i < guidesIds.length; i++) {
             generateRowTextViews(guidesIds[i], lenghtWord[i], i);
         }
-
+        initWords();
+        pickWord();
+        //prueba de metodos
         showWord("mec", 0);
         showFirstLetter("castaña",1);
     }
