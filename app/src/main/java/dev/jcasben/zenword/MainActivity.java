@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private Drawable letterBackground;
     private int widthDisplay;
     private int heightDisplay;
+    private int wordLength;
 
     // variable temporal hasta introducir mejoras.
     private int[] lenghtWord = {3,7,7,7,7};
@@ -341,10 +342,11 @@ public class MainActivity extends AppCompatActivity {
         return colors[ran.nextInt(4)];
     }
 
-    private String pickWord() {
-        // TODO: implementar
-
-        return "";
+    private void pickWord() {
+        Random random = new Random();
+        wordLength = random.nextInt(5) + 3;
+        HashSet<String> aux = lengths.get(wordLength);
+        //TODO (hemos creado sizes para saber cuantas palabras hay de cada longitud)
     }
 
     private void initWords() {
