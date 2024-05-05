@@ -1,6 +1,5 @@
 package dev.jcasben.zenword;
 
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -20,6 +19,8 @@ import android.widget.Toast;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import dev.jcasben.zenword.mappings.UnsortedArrayMapping;
+import dev.jcasben.zenword.mappings.UnsortedLinkedListMapping;
+import dev.jcasben.zenword.sets.UnsortedArraySet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,7 +31,7 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String referenceWord;
+    private String chosenWord;
     private final int[] ids ={R.id.buttonL0, R.id.buttonL1, R.id.buttonL2, R.id.buttonL3,
             R.id.buttonL4, R.id.buttonL5, R.id.buttonL6};
     private final int[] guidesIds = {R.id.guideW0, R.id.guideW1, R.id.guideW2,
@@ -42,7 +43,15 @@ public class MainActivity extends AppCompatActivity {
     private int[][] letterTVId;
     private final String [] colors = {"YELLOW", "GREEN", "RED", "ORANGE"};
 
-    private final UnsortedArrayMapping<Integer, HashSet<String>> words = new UnsortedArrayMapping<>(5);
+    //                     --------------- Catalogos ---------------
+    private final UnsortedLinkedListMapping<String, String> validWords = new UnsortedLinkedListMapping<>();
+    private final UnsortedArrayMapping<Integer, HashSet<String>> lengths = new UnsortedArrayMapping<>(5);
+    private final UnsortedArrayMapping<Integer, HashSet<String>> solutions = new UnsortedArrayMapping<>(5);
+    private final UnsortedArrayMapping<Integer, String> hiddenWords = new UnsortedArrayMapping<>(5);
+    private final UnsortedArraySet<String> found = new UnsortedArraySet<>(5);
+    private final UnsortedArrayMapping<Character, Integer> availableLetters = new UnsortedArrayMapping<>(7);
+    //                     -----------------------------------------
+    private final int[] sizes = new int[5];
 
     private Drawable letterBackground;
     private int widthDisplay;
@@ -64,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         widthDisplay = metrics.widthPixels;
         heightDisplay = metrics.heightPixels;
         // Get reference word
-        referenceWord = getReferenceWord();
+        chosenWord = getReferenceWord();
         // Generate buttons of the circle
         setCircleButtonLetters();
         suffle(null);
@@ -187,10 +196,10 @@ public class MainActivity extends AppCompatActivity {
     //name of the buttons: l0, l1, l2, l3, l4, l5, l6
     private void setCircleButtonLetters(){
         int i;
-        for (i = 0; i < referenceWord.length(); i++) {
+        for (i = 0; i < chosenWord.length(); i++) {
             Button bLetter = findViewById(ids[i]);
             bLetter.setOnClickListener(e -> setLetter(bLetter));
-            bLetter.setText(new char[]{referenceWord.charAt(i)}, 0, 1);
+            bLetter.setText(new char[]{chosenWord.charAt(i)}, 0, 1);
         }
         for ( ;i < 7; i++) {
             Button button = findViewById(ids[i]);
@@ -202,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
     public void suffle (View view) {
         clear(null);
         Random ran = new Random();
-        char[] word = referenceWord.toCharArray();
+        char[] word = chosenWord.toCharArray();
         // suffle the word
         for (int i = 0; i < word.length; i++) {
             int j = ran.nextInt(word.length);
@@ -211,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
             word[j] = aux;
         }
         // put the suffle word on the buttons
-        for (int i = 0; i < referenceWord.length(); i++) {
+        for (int i = 0; i < chosenWord.length(); i++) {
             Button bLetter = findViewById(ids[i]);
             bLetter.setText(word, i, 1);
         }
@@ -232,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void clear(View view) {
         //restart buttons
-        for (int i = 0; i < referenceWord.length(); i++) {
+        for (int i = 0; i < chosenWord.length(); i++) {
             Button b = findViewById(ids[i]);
             b.setEnabled(true);
         }
@@ -340,7 +349,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initWords() {
         for (int i = 3; i < 8; i++) {
-            words.put(i, new HashSet<>());
+            lengths.put(i, new HashSet<>());
         }
         try (InputStream inputStream = getResources().openRawResource(R.raw.paraules)) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -348,7 +357,8 @@ public class MainActivity extends AppCompatActivity {
             while (line != null) {
                 int lengthWord = line.substring(line.indexOf(';') + 1).length();
                 if (lengthWord >= 3 && lengthWord <= 7 ) {
-                    words.get(lengthWord).add(line);
+                    lengths.get(lengthWord).add(line);
+                    sizes[lengthWord - 3]++;
                 }
                 line = reader.readLine();
             }
