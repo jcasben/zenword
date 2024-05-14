@@ -26,8 +26,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashSet;
-import java.util.Random;
+import java.util.*;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,12 +43,22 @@ public class MainActivity extends AppCompatActivity {
     private final String [] colors = {"YELLOW", "GREEN", "RED", "ORANGE"};
 
     //                     --------------- Catalogos ---------------
-    private final UnsortedLinkedListMapping<String, String> validWords = new UnsortedLinkedListMapping<>();
-    private final UnsortedArrayMapping<Integer, HashSet<String>> lengths = new UnsortedArrayMapping<>(5);
+
+    // El catàleg de paraules vàlides amb els seus dos formats: paraula amb accents i paraula sense accents.
+    private final HashMap<String, String> validWords = new HashMap<>();
+    // El catàleg de longituds amb les paraules de cada longitud.
+    private final HashMap<Integer, HashSet<String>> lengths = new HashMap<>();
+    // El catàleg de solucions amb les solucions de cada longitud.
     private final UnsortedArrayMapping<Integer, HashSet<String>> solutions = new UnsortedArrayMapping<>(5);
+    // El catàleg de les paraules per descobrir (paraules ocultes), juntamentamb la informació de la seva posició a la
+    // pantalla. Una vegada que l’usuari descobreix una de les paraules ocultes, aquesta ja no ha de formar part del catàleg
     private final UnsortedArrayMapping<Integer, String> hiddenWords = new UnsortedArrayMapping<>(5);
+    // El catàleg de les solucions trobades.
     private final UnsortedArraySet<String> found = new UnsortedArraySet<>(5);
+    // El cat`aleg de les lletres disponibles: n´umero d’aparicions de cada lletra a la paraula triada, per determinar
+    // si una paraula es pot formar amb les lletres disponibles (´es a dir, si ´es una soluci´o possible).
     private final UnsortedArrayMapping<Character, Integer> availableLetters = new UnsortedArrayMapping<>(7);
+
     //                     -----------------------------------------
     private final int[] sizes = new int[5];
 
@@ -344,9 +353,28 @@ public class MainActivity extends AppCompatActivity {
 
     private void pickWord() {
         Random random = new Random();
-        wordLength = random.nextInt(5) + 3;
-        HashSet<String> aux = lengths.get(wordLength);
-        //TODO (hemos creado sizes para saber cuantas palabras hay de cada longitud)
+        wordLength = random.nextInt(5);
+        Iterator<String> iterator = lengths.get(wordLength).iterator();
+        int numWord = random.nextInt(sizes[wordLength]);
+        int i = 0;
+        while (i <= numWord) {
+            chosenWord = iterator.next();
+            i++;
+        }
+    }
+
+    private void generateHiddenWords() {
+        //Para cada tamaño de la palabra
+        Iterator<Map.Entry<Integer, HashSet<String>>> lengthsIterator = lengths.entrySet().iterator();
+        while (lengthsIterator.hasNext()) {
+            Map.Entry<Integer, HashSet<String>> entry = lengthsIterator.next();
+            Iterator<String> wordsIterator = entry.getValue().iterator();
+            HashSet<String> solutionWordLegth = solutions.get(entry.getKey());
+            while (wordsIterator.hasNext()) {
+                String word = wordsIterator.next();
+                if (isSolutionWord(chosenWord, word)) solutionWordLegth.add(word);
+            }
+        }
     }
 
     private void initWords() {
@@ -357,9 +385,12 @@ public class MainActivity extends AppCompatActivity {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String line = reader.readLine();
             while (line != null) {
-                int lengthWord = line.substring(line.indexOf(';') + 1).length();
+                String word = line.substring(0, line.indexOf(';'));
+                String unformatWord = line.substring(line.indexOf(';') + 1);
+                int lengthWord = unformatWord.length();
                 if (lengthWord >= 3 && lengthWord <= 7 ) {
-                    lengths.get(lengthWord).add(line);
+                    validWords.put(unformatWord, word);
+                    lengths.get(lengthWord).add(unformatWord);
                     sizes[lengthWord - 3]++;
                 }
                 line = reader.readLine();
