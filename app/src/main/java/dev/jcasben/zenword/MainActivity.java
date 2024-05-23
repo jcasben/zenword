@@ -20,7 +20,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import dev.jcasben.zenword.mappings.UnsortedArrayMapping;
 import dev.jcasben.zenword.mappings.UnsortedLinkedListMapping;
-import dev.jcasben.zenword.sets.TrieSet;
 import dev.jcasben.zenword.sets.UnsortedArraySet;
 
 import java.io.BufferedReader;
@@ -55,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     // pantalla. Una vegada que l’usuari descobreix una de les paraules ocultes, aquesta ja no ha de formar part del catàleg
     private final UnsortedArrayMapping<Integer, String> hiddenWords = new UnsortedArrayMapping<>(5);
     // El catàleg de les solucions trobades.
-    private final TrieSet found = new TrieSet();
+    private final TreeSet<String> found = new TreeSet<>();
     // El cat`aleg de les lletres disponibles: n´umero d’aparicions de cada lletra a la paraula triada, per determinar
     // si una paraula es pot formar amb les lletres disponibles (´es a dir, si ´es una soluci´o possible).
     private final UnsortedArrayMapping<Character, Integer> availableLetters = new UnsortedArrayMapping<>(7);
