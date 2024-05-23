@@ -82,30 +82,37 @@ public class MainActivity extends AppCompatActivity {
         getWindowManager().getDefaultDisplay().getMetrics(metrics) ;
         widthDisplay = metrics.widthPixels;
         heightDisplay = metrics.heightPixels;
-        // Get reference word
-        chosenWord = getReferenceWord();
+
+        initWords();
+        pickWord();
+        generateHiddenWords();
         // Generate buttons of the circle
+
         setCircleButtonLetters();
         suffle(null);
-
 
         // inicializar la matriz de letras para poder guardar los id de los tv
         letterTVId = new int[5][];
         for (int i = 0; i < letterTVId.length; i++) {
-            letterTVId[i] = new int[lenghtWord[i]];
+            int l = hiddenWords.get(i).length();
+            letterTVId[i] = new int[l];
         }
         // generar las filas de las palabras
+        /*
         for (int i = 0; i < guidesIds.length; i++) {
             generateRowTextViews(guidesIds[i], lenghtWord[i], i);
         }
-        initWords();
-        pickWord();
+         */
+        Iterator<UnsortedArrayMapping.Pair<Integer, String>> hiddensIterator = hiddenWords.iterator();
+        while (hiddensIterator.hasNext()) {
+            UnsortedArrayMapping.Pair<Integer, String> pair = hiddensIterator.next();
+            generateRowTextViews(guidesIds[pair.getKey()], pair.getValue().length(), pair.getKey());
+        }
+
         //prueba de metodos
         showWord("mec", 0);
         showFirstLetter("castaña",1);
     }
-
-
 
     // onClick letter buttons function
     public void setLetter(View view){
@@ -116,14 +123,11 @@ public class MainActivity extends AppCompatActivity {
         TextView piceWord = findViewById(R.id.textVWordFormation);
         String word = piceWord.getText().toString();
         word += letter;
+        word = word.toUpperCase();
         piceWord.setText(word);
 
         //Enable button.
         but.setEnabled(false);
-    }
-
-    private String getReferenceWord(){
-        return "coche".toUpperCase();
     }
 
     public TextView[] generateRowTextViews (int guide, int letters, int numline) {
@@ -248,7 +252,6 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-
     public void clear(View view) {
         //restart buttons
         for (int i = 0; i < chosenWord.length(); i++) {
@@ -259,7 +262,6 @@ public class MainActivity extends AppCompatActivity {
         TextView tv = findViewById(R.id.textVWordFormation);
         tv.setText("");
     }
-
 
     private boolean isSolutionWord(String word1, String word2){
         UnsortedArrayMapping<Character,Integer> catalogue = new UnsortedArrayMapping<>(word1.length());
@@ -355,15 +357,22 @@ public class MainActivity extends AppCompatActivity {
         Random random = new Random();
         wordLength = random.nextInt(5);
         Iterator<String> iterator = lengths.get(wordLength).iterator();
-        int numWord = random.nextInt(sizes[wordLength]);
+        int numWord = random.nextInt(sizes[wordLength - 3]);
         int i = 0;
-        while (i <= numWord) {
+        while (i <= numWord && iterator.hasNext()) {
             chosenWord = iterator.next();
             i++;
         }
     }
 
     private void generateHiddenWords() {
+        Random ran = new Random();
+
+        //Inicializar los HashSet de solution.
+        for (int i = 3; i < 8; i++) {
+            solutions.put(i, new HashSet<>());
+        }
+
         //Para cada tamaño de la palabra
         Iterator<Map.Entry<Integer, HashSet<String>>> lengthsIterator = lengths.entrySet().iterator();
         while (lengthsIterator.hasNext()) {
@@ -372,7 +381,10 @@ public class MainActivity extends AppCompatActivity {
             HashSet<String> solutionWordLegth = solutions.get(entry.getKey());
             while (wordsIterator.hasNext()) {
                 String word = wordsIterator.next();
-                if (isSolutionWord(chosenWord, word)) solutionWordLegth.add(word);
+                if (isSolutionWord(chosenWord, word)) {
+                    solutionWordLegth.add(word);
+                    sizesSolutions[entry.getKey() - 3]++;
+                }
             }
         }
     }
@@ -390,8 +402,7 @@ public class MainActivity extends AppCompatActivity {
                 int lengthWord = unformatWord.length();
                 if (lengthWord >= 3 && lengthWord <= 7 ) {
                     validWords.put(unformatWord, word);
-                    lengths.get(lengthWord).add(unformatWord);
-                    sizes[lengthWord - 3]++;
+                    if (lengths.get(lengthWord).add(unformatWord)) sizes[lengthWord - 3]++;
                 }
                 line = reader.readLine();
             }
