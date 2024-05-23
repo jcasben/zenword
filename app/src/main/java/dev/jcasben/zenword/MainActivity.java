@@ -19,18 +19,13 @@ import android.widget.Toast;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import dev.jcasben.zenword.mappings.UnsortedArrayMapping;
-import dev.jcasben.zenword.mappings.UnsortedLinkedListMapping;
-import dev.jcasben.zenword.sets.UnsortedArraySet;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import dev.jcasben.zenword.wordUtils.WordsProvider;
+
 import java.util.*;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String chosenWord;
     private final int[] ids ={R.id.buttonL0, R.id.buttonL1, R.id.buttonL2, R.id.buttonL3,
             R.id.buttonL4, R.id.buttonL5, R.id.buttonL6};
     private final int[] guidesIds = {R.id.guideW0, R.id.guideW1, R.id.guideW2,
@@ -42,34 +37,11 @@ public class MainActivity extends AppCompatActivity {
     private int[][] letterTVId;
     private final String [] colors = {"YELLOW", "GREEN", "RED", "ORANGE"};
 
-    //                     --------------- Catalogos ---------------
-
-    // El catàleg de paraules vàlides amb els seus dos formats: paraula amb accents i paraula sense accents.
-    private final HashMap<String, String> validWords = new HashMap<>();
-    // El catàleg de longituds amb les paraules de cada longitud.
-    private final HashMap<Integer, HashSet<String>> lengths = new HashMap<>();
-    // El catàleg de solucions amb les solucions de cada longitud.
-    private final UnsortedArrayMapping<Integer, HashSet<String>> solutions = new UnsortedArrayMapping<>(5);
-    // El catàleg de les paraules per descobrir (paraules ocultes), juntamentamb la informació de la seva posició a la
-    // pantalla. Una vegada que l’usuari descobreix una de les paraules ocultes, aquesta ja no ha de formar part del catàleg
-    private final UnsortedArrayMapping<Integer, String> hiddenWords = new UnsortedArrayMapping<>(5);
-    // El catàleg de les solucions trobades.
-    private final TreeSet<String> found = new TreeSet<>();
-    // El cat`aleg de les lletres disponibles: n´umero d’aparicions de cada lletra a la paraula triada, per determinar
-    // si una paraula es pot formar amb les lletres disponibles (´es a dir, si ´es una soluci´o possible).
-    private final UnsortedArrayMapping<Character, Integer> availableLetters = new UnsortedArrayMapping<>(7);
-
-    //                     -----------------------------------------
-    private final int[] sizes = new int[5];
-    private final int[] sizesSolutions = new int[5];
-
     private Drawable letterBackground;
     private int widthDisplay;
     private int heightDisplay;
-    private int wordLength;
 
-    // variable temporal hasta introducir mejoras.
-    private int[] lenghtWord = {3,7,7,7,7};
+    private WordsProvider wordsProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,35 +56,14 @@ public class MainActivity extends AppCompatActivity {
         widthDisplay = metrics.widthPixels;
         heightDisplay = metrics.heightPixels;
 
-        initWords();
-        pickWord();
-        generateHiddenWords();
+        wordsProvider = new WordsProvider(getResources().openRawResource(R.raw.paraules));
+        wordsProvider.initializeGameWords();
         // Generate buttons of the circle
-
-        setCircleButtonLetters();
-        suffle(null);
-
-        // inicializar la matriz de letras para poder guardar los id de los tv
-        letterTVId = new int[5][];
-        for (int i = 0; i < letterTVId.length; i++) {
-            int l = hiddenWords.get(i).length();
-            letterTVId[i] = new int[l];
-        }
-        // generar las filas de las palabras
-        /*
-        for (int i = 0; i < guidesIds.length; i++) {
-            generateRowTextViews(guidesIds[i], lenghtWord[i], i);
-        }
-         */
-        Iterator<UnsortedArrayMapping.Pair<Integer, String>> hiddensIterator = hiddenWords.iterator();
-        while (hiddensIterator.hasNext()) {
-            UnsortedArrayMapping.Pair<Integer, String> pair = hiddensIterator.next();
-            generateRowTextViews(guidesIds[pair.getKey()], pair.getValue().length(), pair.getKey());
-        }
-
+        onClickStartNewGame(null);
+        
         //prueba de metodos
-        showWord("mec", 0);
-        showFirstLetter("castaña",1);
+//        showWord("mec", 0);
+//        showFirstLetter("castaña",1);
     }
 
     // onClick letter buttons function
@@ -207,14 +158,23 @@ public class MainActivity extends AppCompatActivity {
         return line;
     }
 
+    private void removeTextViews() {
+        ConstraintLayout main = findViewById(R.id.main);
+        for(int i = 0; i < letterTVId.length; i++) {
+           for(int j = 0; j < letterTVId[i].length; j++) {
+               main.removeView(findViewById(letterTVId[i][j]));
+           }
+        }
+    }
+
 
     //name of the buttons: l0, l1, l2, l3, l4, l5, l6
-    private void setCircleButtonLetters(){
+    private void setCircleButtonLetters() {
         int i;
-        for (i = 0; i < chosenWord.length(); i++) {
+        for (i = 0; i < wordsProvider.getChosenWord().length(); i++) {
             Button bLetter = findViewById(ids[i]);
             bLetter.setOnClickListener(e -> setLetter(bLetter));
-            bLetter.setText(new char[]{chosenWord.charAt(i)}, 0, 1);
+            bLetter.setText(new char[]{wordsProvider.getChosenWord().charAt(i)}, 0, 1);
         }
         for ( ;i < 7; i++) {
             Button button = findViewById(ids[i]);
@@ -226,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
     public void suffle (View view) {
         clear(null);
         Random ran = new Random();
-        char[] word = chosenWord.toCharArray();
+        char[] word = wordsProvider.getChosenWord().toCharArray();
         // suffle the word
         for (int i = 0; i < word.length; i++) {
             int j = ran.nextInt(word.length);
@@ -235,13 +195,12 @@ public class MainActivity extends AppCompatActivity {
             word[j] = aux;
         }
         // put the suffle word on the buttons
-        for (int i = 0; i < chosenWord.length(); i++) {
+        for (int i = 0; i < wordsProvider.getChosenWord().length(); i++) {
             Button bLetter = findViewById(ids[i]);
             bLetter.setText(word, i, 1);
         }
     }
 
-    // onClick bonus button
     public void bonus(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("encertades i possibles");
@@ -255,33 +214,13 @@ public class MainActivity extends AppCompatActivity {
 
     public void clear(View view) {
         //restart buttons
-        for (int i = 0; i < chosenWord.length(); i++) {
+        for (int i = 0; i < wordsProvider.getChosenWord().length(); i++) {
             Button b = findViewById(ids[i]);
             b.setEnabled(true);
         }
         //clear text view
         TextView tv = findViewById(R.id.textVWordFormation);
         tv.setText("");
-    }
-
-    private boolean isSolutionWord(String word1, String word2){
-        UnsortedArrayMapping<Character,Integer> catalogue = new UnsortedArrayMapping<>(word1.length());
-        // generate the catalogue of word 1
-        for (int i = 0; i < word1.length(); i++) {
-            Integer v = catalogue.put(word1.charAt(i), 1);
-            if (v != null) {
-                catalogue.put(word1.charAt(i), v+1);
-            }
-        }
-
-        // check if word2 could be generated with the catalogue
-        for (int i = 0; i < word2.length(); i++) {
-            Integer value = catalogue.get(word2.charAt(i));
-            if (value == null || value == 0) return false;
-            catalogue.put(word2.charAt(i), value - 1);
-        }
-        // if the program arrives here is because word 2 can be formed with the letters of word1
-        return true;
     }
 
     private void setUIColor(String color) {
@@ -317,8 +256,24 @@ public class MainActivity extends AppCompatActivity {
         toast.show();
     }
 
-    public void onClickRestart(View view) {
+    public void onClickStartNewGame(View view) {
+        if (letterTVId != null) removeTextViews();
         setUIColor(pickRandomColor());
+        wordsProvider.initializeGameWords();
+        setCircleButtonLetters();
+        suffle(null);
+
+        letterTVId = new int[5][];
+        for (int i = 0; i < letterTVId.length; i++) {
+            int l = wordsProvider.getHiddenWords().get(i).length();
+            letterTVId[i] = new int[l];
+        }
+
+        Iterator<UnsortedArrayMapping.Pair<Integer, String>> hiddensIterator = wordsProvider.getHiddenWords().iterator();
+        while (hiddensIterator.hasNext()) {
+            UnsortedArrayMapping.Pair<Integer, String> pair = hiddensIterator.next();
+            generateRowTextViews(guidesIds[pair.getKey()], pair.getValue().length(), pair.getKey());
+        }
         /*
         En aquest apartat s’ha d’implementar la funcionalitat del bot´o reiniciar, que
         ha de:
@@ -332,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void enableViews(int parent) {
-        ViewGroup group = (ViewGroup) findViewById(R.id.main);
+        ViewGroup group = findViewById(R.id.main);
         for (int i = 0; i < group.getChildCount(); i++) {
             View v = group.getChildAt(i);
             v.setEnabled(true);
@@ -352,97 +307,6 @@ public class MainActivity extends AppCompatActivity {
     private String pickRandomColor() {
         Random ran = new Random();
         return colors[ran.nextInt(4)];
-    }
-
-    private void pickWord() {
-        Random random = new Random();
-        wordLength = random.nextInt(5) + 3;
-        Iterator<String> iterator = lengths.get(wordLength).iterator();
-        int numWord = random.nextInt(sizes[wordLength - 3]);
-        int i = 0;
-        while (i <= numWord && iterator.hasNext()) {
-            chosenWord = iterator.next();
-            i++;
-        }
-    }
-
-    private void generateHiddenWords() {
-        Random ran = new Random();
-
-        //Inicializar los HashSet de solution.
-        for (int i = 3; i < 8; i++) {
-            solutions.put(i, new HashSet<>());
-        }
-
-        //Para cada tamaño de la palabra
-        Iterator<Map.Entry<Integer, HashSet<String>>> lengthsIterator = lengths.entrySet().iterator();
-        while (lengthsIterator.hasNext()) {
-            Map.Entry<Integer, HashSet<String>> entry = lengthsIterator.next();
-            Iterator<String> wordsIterator = entry.getValue().iterator();
-            HashSet<String> solutionWordLegth = solutions.get(entry.getKey());
-            while (wordsIterator.hasNext()) {
-                String word = wordsIterator.next();
-                if (isSolutionWord(chosenWord, word)) {
-                    solutionWordLegth.add(word);
-                    sizesSolutions[entry.getKey() - 3]++;
-                }
-            }
-        }
-
-        //generate the 5 hidden words
-        int pos = 4;
-        for (int i = wordLength; i > 3; i--) {
-            int tam = sizesSolutions[i - 3];
-            if (tam > 0) {
-                int randomNumber = ran.nextInt(sizesSolutions[i - 3]);
-                String hidenWord = "";
-                Iterator<String> hidenIterator = solutions.get(i).iterator();
-                while (randomNumber >= 0 && hidenIterator.hasNext()) {
-                    hidenWord = hidenIterator.next();
-                    randomNumber--;
-                }
-                hiddenWords.put(pos, hidenWord);
-                pos--;
-            }
-        }
-
-        int tam = sizesSolutions[0];
-        if (tam >= 0) {
-            String hidenWord = "";
-            Iterator<String> hidenIterator = solutions.get(3).iterator();
-            while (pos >= 0){
-                int randomNumber = ran.nextInt(sizesSolutions[0]);
-                while (randomNumber >= 0 && hidenIterator.hasNext()) {
-                    hidenWord = hidenIterator.next();
-                    randomNumber--;
-                }
-                hiddenWords.put(pos, hidenWord);
-                pos--;
-            }
-        }
-    }
-
-    private void initWords() {
-        for (int i = 3; i < 8; i++) {
-            lengths.put(i, new HashSet<>());
-        }
-        try (InputStream inputStream = getResources().openRawResource(R.raw.paraules)) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line = reader.readLine();
-            while (line != null) {
-                String word = line.substring(0, line.indexOf(';'));
-                String unformatWord = line.substring(line.indexOf(';') + 1);
-                int lengthWord = unformatWord.length();
-                if (lengthWord >= 3 && lengthWord <= 7 ) {
-                    validWords.put(unformatWord, word);
-                    if (lengths.get(lengthWord).add(unformatWord)) sizes[lengthWord - 3]++;
-                }
-                line = reader.readLine();
-            }
-            reader.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private void initUIColorsAndDrawables() {
