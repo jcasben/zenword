@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
 
     //                     -----------------------------------------
     private final int[] sizes = new int[5];
+    private final int[] sizesSolutions = new int[5];
 
     private Drawable letterBackground;
     private int widthDisplay;
@@ -356,7 +357,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void pickWord() {
         Random random = new Random();
-        wordLength = random.nextInt(5);
+        wordLength = random.nextInt(5) + 3;
         Iterator<String> iterator = lengths.get(wordLength).iterator();
         int numWord = random.nextInt(sizes[wordLength - 3]);
         int i = 0;
@@ -386,6 +387,38 @@ public class MainActivity extends AppCompatActivity {
                     solutionWordLegth.add(word);
                     sizesSolutions[entry.getKey() - 3]++;
                 }
+            }
+        }
+
+        //generate the 5 hidden words
+        int pos = 4;
+        for (int i = wordLength; i > 3; i--) {
+            int tam = sizesSolutions[i - 3];
+            if (tam > 0) {
+                int randomNumber = ran.nextInt(sizesSolutions[i - 3]);
+                String hidenWord = "";
+                Iterator<String> hidenIterator = solutions.get(i).iterator();
+                while (randomNumber >= 0 && hidenIterator.hasNext()) {
+                    hidenWord = hidenIterator.next();
+                    randomNumber--;
+                }
+                hiddenWords.put(pos, hidenWord);
+                pos--;
+            }
+        }
+
+        int tam = sizesSolutions[0];
+        if (tam >= 0) {
+            String hidenWord = "";
+            Iterator<String> hidenIterator = solutions.get(3).iterator();
+            while (pos >= 0){
+                int randomNumber = ran.nextInt(sizesSolutions[0]);
+                while (randomNumber >= 0 && hidenIterator.hasNext()) {
+                    hidenWord = hidenIterator.next();
+                    randomNumber--;
+                }
+                hiddenWords.put(pos, hidenWord);
+                pos--;
             }
         }
     }
