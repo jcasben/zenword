@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         wordsProvider = new WordsProvider(getResources().openRawResource(R.raw.paraules));
         wordsProvider.initializeGameWords();
         // Generate buttons of the circle
-        onClickStartNewGame(null);
+        startNewGame(null);
         
         //prueba de metodos
 //        showWord("mec", 0);
@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         but.setEnabled(false);
     }
 
-    public TextView[] generateRowTextViews (int guide, int letters, int numline) {
+    public void generateRowTextViews (int guide, int letters, int numline) {
         TextView[] line = new TextView[letters];
         ConstraintLayout main = findViewById(R.id.main);
         for (int i = 0; i < letters; i++) {
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
             line[i] = x;
             main.addView(x);
         }
-        int whidth = (widthDisplay/7) - (int)(0.05*widthDisplay);
+        int width = (widthDisplay/7) - (int)(0.05*widthDisplay);
         ConstraintSet constraintSet = new ConstraintSet();
         for (int i = 0; i < letters; i++) {
             constraintSet.connect(
@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
                         ConstraintSet.START,
                         ConstraintSet.PARENT_ID,
                         ConstraintSet.END,
-                        whidth*(7-letters)/2
+                        width*(7-letters)/2
                 );
             }
             else {
@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
                         ConstraintSet.END,
                         ConstraintSet.PARENT_ID,
                         ConstraintSet.START,
-                        whidth*(7-letters)/2
+                        width*(7-letters)/2
                 );
             }
             else  {
@@ -150,26 +150,28 @@ public class MainActivity extends AppCompatActivity {
                 );
             }
 
-            constraintSet.constrainWidth(line[i].getId(),whidth);
-            constraintSet.constrainHeight(line[i].getId(),whidth);
+            constraintSet.constrainWidth(line[i].getId(),width);
+            constraintSet.constrainHeight(line[i].getId(),width);
             constraintSet.applyTo(main);
         }
-
-        return line;
     }
 
     private void removeTextViews() {
         ConstraintLayout main = findViewById(R.id.main);
-        for(int i = 0; i < letterTVId.length; i++) {
-           for(int j = 0; j < letterTVId[i].length; j++) {
-               main.removeView(findViewById(letterTVId[i][j]));
-           }
+        for (int[] ints : letterTVId) {
+            for (int anInt : ints) {
+                main.removeView(findViewById(anInt));
+            }
         }
     }
 
 
     //name of the buttons: l0, l1, l2, l3, l4, l5, l6
     private void setCircleButtonLetters() {
+        for (int id : ids) {
+            Button button = findViewById(id);
+            button.setVisibility(View.VISIBLE);
+        }
         int i;
         for (i = 0; i < wordsProvider.getChosenWord().length(); i++) {
             Button bLetter = findViewById(ids[i]);
@@ -199,6 +201,13 @@ public class MainActivity extends AppCompatActivity {
             Button bLetter = findViewById(ids[i]);
             bLetter.setText(word, i, 1);
         }
+    }
+
+    public void send(View view) {
+        TextView textView = findViewById(R.id.textVWordFormation);
+        String word = (String) textView.getText();
+        clear(null);
+        System.out.println(word);
     }
 
     public void bonus(View view) {
@@ -256,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
         toast.show();
     }
 
-    public void onClickStartNewGame(View view) {
+    public void startNewGame(View view) {
         if (letterTVId != null) removeTextViews();
         setUIColor(pickRandomColor());
         wordsProvider.initializeGameWords();
