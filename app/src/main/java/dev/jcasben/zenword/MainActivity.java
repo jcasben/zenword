@@ -16,8 +16,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.core.content.ContextCompat;
+
 import dev.jcasben.zenword.mappings.UnsortedArrayMapping;
 
 import dev.jcasben.zenword.wordUtils.WordsProvider;
@@ -26,16 +29,16 @@ import java.util.*;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final int[] ids ={R.id.buttonL0, R.id.buttonL1, R.id.buttonL2, R.id.buttonL3,
+    private final int[] ids = {R.id.buttonL0, R.id.buttonL1, R.id.buttonL2, R.id.buttonL3,
             R.id.buttonL4, R.id.buttonL5, R.id.buttonL6};
     private final int[] guidesIds = {R.id.guideW0, R.id.guideW1, R.id.guideW2,
             R.id.guideW3, R.id.guideW4};
     private final UnsortedArrayMapping<String, Drawable[]> drawableColors =
             new UnsortedArrayMapping<>(4);
     private final UnsortedArrayMapping<String, int[]> buttonColors =
-             new UnsortedArrayMapping<>(4);
+            new UnsortedArrayMapping<>(4);
     private int[][] letterTVId;
-    private final String [] colors = {"YELLOW", "GREEN", "RED", "ORANGE"};
+    private final String[] colors = {"YELLOW", "GREEN", "RED", "ORANGE"};
 
     private Drawable letterBackground;
     private int widthDisplay;
@@ -52,22 +55,20 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setUIColor("YELLOW");
         DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics) ;
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
         widthDisplay = metrics.widthPixels;
         heightDisplay = metrics.heightPixels;
-
-        wordsProvider = new WordsProvider(getResources().openRawResource(R.raw.paraules));
-        wordsProvider.initializeGameWords();
         // Generate buttons of the circle
+        wordsProvider = new WordsProvider(getResources().openRawResource(R.raw.paraules));
         startNewGame(null);
-        
+
         //prueba de metodos
 //        showWord("mec", 0);
 //        showFirstLetter("castaña",1);
     }
 
     // onClick letter buttons function
-    public void setLetter(View view){
+    public void setLetter(View view) {
         Button but = (Button) view;
         //Get the letter of the button.
         String letter = but.getText().toString();
@@ -79,10 +80,11 @@ public class MainActivity extends AppCompatActivity {
         piceWord.setText(word);
 
         //Enable button.
+        but.setTextColor(ContextCompat.getColor(this, R.color.disabled));
         but.setEnabled(false);
     }
 
-    public void generateRowTextViews (int guide, int letters, int numline) {
+    public void generateRowTextViews(int guide, int letters, int numline) {
         TextView[] line = new TextView[letters];
         ConstraintLayout main = findViewById(R.id.main);
         for (int i = 0; i < letters; i++) {
@@ -101,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
             line[i] = x;
             main.addView(x);
         }
-        int width = (widthDisplay/7) - (int)(0.05*widthDisplay);
+        int width = (widthDisplay / 7) - (int) (0.05 * widthDisplay);
         ConstraintSet constraintSet = new ConstraintSet();
         for (int i = 0; i < letters; i++) {
             constraintSet.connect(
@@ -112,46 +114,44 @@ public class MainActivity extends AppCompatActivity {
                     10
             );
 
-            if (i == 0){
+            if (i == 0) {
                 constraintSet.connect(
                         line[i].getId(),
                         ConstraintSet.START,
                         ConstraintSet.PARENT_ID,
                         ConstraintSet.END,
-                        width*(7-letters)/2
+                        width * (7 - letters) / 2
                 );
-            }
-            else {
+            } else {
                 constraintSet.connect(
                         line[i].getId(),
                         ConstraintSet.START,
-                        line[i-1].getId(),
+                        line[i - 1].getId(),
                         ConstraintSet.END,
                         5
                 );
             }
 
-            if (i == letters-1) {
+            if (i == letters - 1) {
                 constraintSet.connect(
                         line[i].getId(),
                         ConstraintSet.END,
                         ConstraintSet.PARENT_ID,
                         ConstraintSet.START,
-                        width*(7-letters)/2
+                        width * (7 - letters) / 2
                 );
-            }
-            else  {
+            } else {
                 constraintSet.connect(
                         line[i].getId(),
                         ConstraintSet.END,
-                        line[i+1].getId(),
+                        line[i + 1].getId(),
                         ConstraintSet.START,
                         5
                 );
             }
 
-            constraintSet.constrainWidth(line[i].getId(),width);
-            constraintSet.constrainHeight(line[i].getId(),width);
+            constraintSet.constrainWidth(line[i].getId(), width);
+            constraintSet.constrainHeight(line[i].getId(), width);
             constraintSet.applyTo(main);
         }
     }
@@ -178,14 +178,14 @@ public class MainActivity extends AppCompatActivity {
             bLetter.setOnClickListener(e -> setLetter(bLetter));
             bLetter.setText(new char[]{wordsProvider.getChosenWord().charAt(i)}, 0, 1);
         }
-        for ( ;i < 7; i++) {
+        for (; i < 7; i++) {
             Button button = findViewById(ids[i]);
             button.setVisibility(View.GONE);
         }
     }
 
     // onClick random button function
-    public void suffle (View view) {
+    public void suffle(View view) {
         clear(null);
         Random ran = new Random();
         char[] word = wordsProvider.getChosenWord().toCharArray();
@@ -226,6 +226,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < wordsProvider.getChosenWord().length(); i++) {
             Button b = findViewById(ids[i]);
             b.setEnabled(true);
+            b.setTextColor(ContextCompat.getColor(this, R.color.white));
         }
         //clear text view
         TextView tv = findViewById(R.id.textVWordFormation);
@@ -266,21 +267,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startNewGame(View view) {
+
+        wordsProvider.initializeGameWords();
         if (letterTVId != null) removeTextViews();
         setUIColor(pickRandomColor());
-        wordsProvider.initializeGameWords();
         setCircleButtonLetters();
         suffle(null);
 
-        letterTVId = new int[5][];
+        int lines = wordsProvider.getHiddenWords().entrySet().size();
+        letterTVId = new int[lines][];
         for (int i = 0; i < letterTVId.length; i++) {
             int l = wordsProvider.getHiddenWords().get(i).length();
             letterTVId[i] = new int[l];
         }
 
-        Iterator<UnsortedArrayMapping.Pair<Integer, String>> hiddensIterator = wordsProvider.getHiddenWords().iterator();
+        Iterator<Map.Entry<Integer, String>> hiddensIterator = wordsProvider.getHiddenWords().entrySet().iterator();
         while (hiddensIterator.hasNext()) {
-            UnsortedArrayMapping.Pair<Integer, String> pair = hiddensIterator.next();
+            Map.Entry<Integer, String> pair = hiddensIterator.next();
             generateRowTextViews(guidesIds[pair.getKey()], pair.getValue().length(), pair.getKey());
         }
         /*
@@ -320,32 +323,32 @@ public class MainActivity extends AppCompatActivity {
 
     private void initUIColorsAndDrawables() {
         drawableColors.put("YELLOW", new Drawable[]{
-                getDrawable(R.drawable.circle_yellow),
-                getDrawable(R.drawable.square_letter_yellow)
+                AppCompatResources.getDrawable(this, R.drawable.circle_yellow),
+                AppCompatResources.getDrawable(this, R.drawable.square_letter_yellow)
         });
         buttonColors.put("YELLOW", new int[]{
                 0xBFFFF281, 0x79FFF281
         });
 
         drawableColors.put("GREEN", new Drawable[]{
-                getDrawable(R.drawable.circle_green),
-                getDrawable(R.drawable.square_letter_green)
+                AppCompatResources.getDrawable(this, R.drawable.circle_green),
+                AppCompatResources.getDrawable(this, R.drawable.square_letter_green)
         });
         buttonColors.put("GREEN", new int[]{
                 0xBF89FF81, 0x7889FF81
         });
 
         drawableColors.put("RED", new Drawable[]{
-                getDrawable(R.drawable.circle_red),
-                getDrawable(R.drawable.square_letter_red)
+                AppCompatResources.getDrawable(this, R.drawable.circle_red),
+                AppCompatResources.getDrawable(this, R.drawable.square_letter_red)
         });
         buttonColors.put("RED", new int[]{
                 0xBFFF8181, 0x78FF8181
         });
 
         drawableColors.put("ORANGE", new Drawable[]{
-                getDrawable(R.drawable.circle_orange),
-                getDrawable(R.drawable.square_letter_orange)
+                AppCompatResources.getDrawable(this, R.drawable.circle_orange),
+                AppCompatResources.getDrawable(this, R.drawable.square_letter_orange)
         });
         buttonColors.put("ORANGE", new int[]{
                 0xBFFF9800, 0x78FF9800
