@@ -30,6 +30,7 @@ public class WordsProvider {
 
     private final int[] sizes = new int[5];
     private int[] sizesSolutions = new int[5];
+    private Integer hiddenWordsNumber = 5;
     private int wordLength;
     private String chosenWord;
 
@@ -171,9 +172,15 @@ public class WordsProvider {
         return chosenWord;
     }
 
+    public UnsortedArrayMapping<Integer, HashSet<String>> getSolutions() {
+        return solutions;
+    }
+
     public TreeSet<String> getFound() {
         return found;
     }
+
+    public Integer getHiddenWordsNumber() { return hiddenWordsNumber;}
 
     public HashMap<String, String> getValidWords() {
         return validWords;
