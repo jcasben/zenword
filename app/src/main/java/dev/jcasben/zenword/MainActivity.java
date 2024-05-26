@@ -44,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
     private int widthDisplay;
     private int heightDisplay;
 
+    private final int PUNTOSPARABONUS = 5;
+    private int bonusPoints = 0;
+
     private WordsProvider wordsProvider;
 
     @Override
@@ -203,6 +206,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void send(View view) {
+        boolean found = false;
+        Integer hiddenWordsNumber = wordsProvider.getHiddenWordsNumber();
         TextView textView = findViewById(R.id.textVWordFormation);
         String word = (String) textView.getText();
         word = word.toLowerCase();
@@ -215,11 +220,45 @@ public class MainActivity extends AppCompatActivity {
                 showMessage("Encertada!", false);
                 wordsProvider.getFound().add(word);
                 hiddenIterator.remove();
+                hiddenWordsNumber = hiddenWordsNumber - 1;
+                found = true;
                 break;
             }
         }
+        if (!found) {
+            HashSet<String> sol =  wordsProvider.getSolutions().get(word.length());
+            if (sol.contains(word)) {
+                if (!wordsProvider.getFound().contains(word)) {
+                    wordsProvider.getFound().add(word);
+                    showMessage("Paraula vàlida! Tens un bonus", false);
+                    bonusPoints++;
+                    // si tiene suficientes puntos para bonus se muestra la primera letra de una palabra random.
+                    if (bonusPoints == PUNTOSPARABONUS) {
+                        Random ran = new Random();
+                        int aux = ran.nextInt(hiddenWordsNumber);
+                        Iterator<Map.Entry<Integer, String>> hiddenIteratorAux = wordsProvider.getHiddenWords().entrySet().iterator();
+                        while (hiddenIteratorAux.hasNext() && (aux >= 0)){
+                            Map.Entry<Integer, String> entry = hiddenIterator.next();
+                            if ((aux - 1) == 0) {
+                                showFirstLetter(entry.getValue(), entry.getKey());
+                                break;
+                            }
+                            aux--;
+                        }
+                    }
+                } else {
+                    showMessage("Aquesta ja la tens", false);
+                }
+            }
+        }
+        if (!found) {
+            showMessage("Paraula no vàlida", false);
+        }
 
-        if (wordsProvider.getHiddenWords().isEmpty()) disableViews();
+        if (wordsProvider.getHiddenWords().isEmpty()) {
+            showMessage("Enhorabona! has guanyat", true);
+            disableViews();
+        }
     }
 
     public void bonus(View view) {
