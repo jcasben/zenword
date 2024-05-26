@@ -62,7 +62,7 @@ public class WordsProvider {
 
     public void initializeGameWords() {
         hiddenWords = new TreeMap<>();
-        found = new TreeSet<>();
+        found = new TreeSet<>(Comparator.comparingInt(String::length).thenComparing(Comparator.naturalOrder()));
         availableLetters = new UnsortedArrayMapping<>(7);
         solutions = new UnsortedArrayMapping<>(5);
         sizesSolutions = new int[5];
@@ -169,6 +169,14 @@ public class WordsProvider {
 
     public String getChosenWord() {
         return chosenWord;
+    }
+
+    public TreeSet<String> getFound() {
+        return found;
+    }
+
+    public HashMap<String, String> getValidWords() {
+        return validWords;
     }
 
     private boolean isSolutionWord(String word1, String word2) {

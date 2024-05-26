@@ -99,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
             x.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             x.setTextSize(24);
             x.setTypeface(null, Typeface.BOLD);
-            x.setTextColor(Color.BLACK);
             line[i] = x;
             main.addView(x);
         }
@@ -206,8 +205,21 @@ public class MainActivity extends AppCompatActivity {
     public void send(View view) {
         TextView textView = findViewById(R.id.textVWordFormation);
         String word = (String) textView.getText();
+        word = word.toLowerCase();
         clear(null);
-        System.out.println(word);
+        Iterator<Map.Entry<Integer, String>> hiddenIterator = wordsProvider.getHiddenWords().entrySet().iterator();
+        while (hiddenIterator.hasNext()) {
+            Map.Entry<Integer, String> entry = hiddenIterator.next();
+            if (Objects.equals(entry.getValue(), word)) {
+                showWord(wordsProvider.getValidWords().get(word), entry.getKey());
+                showMessage("Encertada!", false);
+                wordsProvider.getFound().add(word);
+                hiddenIterator.remove();
+                break;
+            }
+        }
+
+        if (wordsProvider.getHiddenWords().isEmpty()) disableViews();
     }
 
     public void bonus(View view) {
@@ -267,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startNewGame(View view) {
-
+        enableViews();
         wordsProvider.initializeGameWords();
         if (letterTVId != null) removeTextViews();
         setUIColor(pickRandomColor());
@@ -298,7 +310,7 @@ public class MainActivity extends AppCompatActivity {
          */
     }
 
-    private void enableViews(int parent) {
+    private void enableViews() {
         ViewGroup group = findViewById(R.id.main);
         for (int i = 0; i < group.getChildCount(); i++) {
             View v = group.getChildAt(i);
@@ -306,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void disableViews(int parent) {
+    private void disableViews() {
         int bonusId = R.id.buttonBonus;
         int resetId = R.id.buttonReset;
         ViewGroup group = (ViewGroup) findViewById(R.id.main);
