@@ -3,6 +3,7 @@ package dev.jcasben.zenword;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -210,6 +211,8 @@ public class MainActivity extends AppCompatActivity {
         Integer hiddenWordsNumber = wordsProvider.getHiddenWordsNumber();
         TextView textView = findViewById(R.id.textVWordFormation);
         String word = (String) textView.getText();
+        if (word.isEmpty()) return;
+
         word = word.toLowerCase();
         clear(null);
         Iterator<Map.Entry<Integer, String>> hiddenIterator = wordsProvider.getHiddenWords().entrySet().iterator();
@@ -219,6 +222,7 @@ public class MainActivity extends AppCompatActivity {
                 showWord(wordsProvider.getValidWords().get(word), entry.getKey());
                 showMessage("Encertada!", false);
                 wordsProvider.getFound().add(word);
+                updateFoundWords(null);
                 hiddenIterator.remove();
                 hiddenWordsNumber = hiddenWordsNumber - 1;
                 found = true;
@@ -230,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
             if (sol.contains(word)) {
                 if (!wordsProvider.getFound().contains(word)) {
                     wordsProvider.getFound().add(word);
+                    updateFoundWords(null);
                     showMessage("Paraula vàlida! Tens un bonus", false);
                     bonusPoints++;
                     // si tiene suficientes puntos para bonus se muestra la primera letra de una palabra random.
@@ -248,6 +253,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else {
                     showMessage("Aquesta ja la tens", false);
+                    updateFoundWords(wordsProvider.getValidWords().get(word));
                 }
             }
         }
@@ -337,6 +343,7 @@ public class MainActivity extends AppCompatActivity {
             Map.Entry<Integer, String> pair = hiddensIterator.next();
             generateRowTextViews(guidesIds[pair.getKey()], pair.getValue().length(), pair.getKey());
         }
+        updateFoundWords(null);
         /*
         En aquest apartat s’ha d’implementar la funcionalitat del bot´o reiniciar, que
         ha de:
@@ -355,6 +362,28 @@ public class MainActivity extends AppCompatActivity {
             View v = group.getChildAt(i);
             v.setEnabled(true);
         }
+    }
+
+    public void updateFoundWords(String wordToRed) {
+        TextView founds = findViewById(R.id.correctWordsTextView);
+        StringBuilder foundWords = new StringBuilder();
+        Iterator<String> foundsIterator = wordsProvider.getFound().iterator();
+        while (foundsIterator.hasNext()) {
+            String nextWord = wordsProvider.getValidWords().get(foundsIterator.next());
+            if (Objects.equals(wordToRed, nextWord)) {
+                nextWord = String.format("<font color='red'>%s</font>", nextWord);
+            }
+            if (foundWords.length() == 0) foundWords.append(nextWord);
+            else {
+                foundWords.append(", ").append(nextWord);
+            }
+        }
+        founds.setText(Html.fromHtml(String.format(
+                "Has encertat %d de %d possibles: %s",
+                wordsProvider.getNumberOfFound(),
+                wordsProvider.getNumberOfPossibleSolutions(),
+                foundWords
+        )));
     }
 
     private void disableViews() {
@@ -378,7 +407,7 @@ public class MainActivity extends AppCompatActivity {
                 AppCompatResources.getDrawable(this, R.drawable.square_letter_yellow)
         });
         buttonColors.put("YELLOW", new int[]{
-                0xBFFFF281, 0x79FFF281
+                0xCCFFEF63, 0x79FFF281
         });
 
         drawableColors.put("GREEN", new Drawable[]{

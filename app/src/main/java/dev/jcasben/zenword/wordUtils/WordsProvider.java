@@ -97,7 +97,6 @@ public class WordsProvider {
             }
         }
 
-//        hiddenWords.put(4, chosenWord);
         aux.add(chosenWord);
 
         int pos = 3;
@@ -114,7 +113,6 @@ public class WordsProvider {
                 if (!Objects.equals(hiddenWord, "")) {
                     aux.add(hiddenWord);
                     pos--;
-//                    hiddenWords.put(pos--, hiddenWord);
                 }
             }
         }
@@ -142,7 +140,6 @@ public class WordsProvider {
                     count3++;
                     aux.add(hiddenWord);
                 }
-//                    hiddenWords.put(pos, hiddenWord);
 
                 Log.i("testHidden", "Hidden word:" + hiddenWord);
             }
@@ -184,6 +181,26 @@ public class WordsProvider {
 
     public HashMap<String, String> getValidWords() {
         return validWords;
+    }
+
+    public int getNumberOfPossibleSolutions() {
+        int solutions = 0;
+        for (int sizesSolution : sizesSolutions) {
+            solutions += sizesSolution;
+        }
+
+        return solutions;
+    }
+
+    public int getNumberOfFound() {
+        int nfound = 0;
+        Iterator<String> iterator = found.iterator();
+        while (iterator.hasNext()) {
+            nfound++;
+            iterator.next();
+        }
+
+        return nfound;
     }
 
     private boolean isSolutionWord(String word1, String word2) {
