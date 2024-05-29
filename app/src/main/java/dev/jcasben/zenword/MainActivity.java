@@ -43,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Drawable letterBackground;
     private int widthDisplay;
-    private int heightDisplay;
 
     private final int PUNTOSPARABONUS = 5;
     private int bonusPoints = 0;
@@ -52,38 +51,31 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Declaration of colors and drawables for UI
+        // Declaracion de los colores y los drawables para la UI
         initUIColorsAndDrawables();
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setUIColor("YELLOW");
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         widthDisplay = metrics.widthPixels;
-        heightDisplay = metrics.heightPixels;
-        // Generate buttons of the circle
+        // Generar los botones del circulo
         wordsProvider = new WordsProvider(getResources().openRawResource(R.raw.paraules));
         startNewGame(null);
-
-        //prueba de metodos
-//        showWord("mec", 0);
-//        showFirstLetter("castaña",1);
     }
 
-    // onClick letter buttons function
+    // Funcion onClick para los botones del circulo
     public void setLetter(View view) {
         Button but = (Button) view;
-        //Get the letter of the button.
+        // Obtener la letra del boton
         String letter = but.getText().toString();
-        // Put it on the text view
+        // Ponerla en el textView
         TextView piceWord = findViewById(R.id.textVWordFormation);
         String word = piceWord.getText().toString();
         word += letter;
         word = word.toUpperCase();
         piceWord.setText(word);
 
-        //Enable button.
+        //Activar el boton
         but.setTextColor(ContextCompat.getColor(this, R.color.disabled));
         but.setEnabled(false);
     }
@@ -91,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
     public void generateRowTextViews(int guide, int letters, int numline) {
         TextView[] line = new TextView[letters];
         ConstraintLayout main = findViewById(R.id.main);
+        // Creamos los textView i les ponemos los parametros que queremos
         for (int i = 0; i < letters; i++) {
             TextView x = new TextView(this);
             int id = View.generateViewId();
@@ -106,7 +99,9 @@ public class MainActivity extends AppCompatActivity {
             line[i] = x;
             main.addView(x);
         }
+        // Calculamos la separacion entre los botones
         int width = (widthDisplay / 7) - (int) (0.05 * widthDisplay);
+        // Añadimos las restricciones y lo añadimos
         ConstraintSet constraintSet = new ConstraintSet();
         for (int i = 0; i < letters; i++) {
             constraintSet.connect(
@@ -153,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
                 );
             }
 
+            // Añadimos los TextViews a la pantalla
             constraintSet.constrainWidth(line[i].getId(), width);
             constraintSet.constrainHeight(line[i].getId(), width);
             constraintSet.applyTo(main);
@@ -160,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void removeTextViews() {
+        // Bora los TextViews
         ConstraintLayout main = findViewById(R.id.main);
         for (int[] ints : letterTVId) {
             for (int anInt : ints) {
@@ -169,37 +166,41 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //name of the buttons: l0, l1, l2, l3, l4, l5, l6
+    // Nombre de los botones: l0, l1, l2, l3, l4, l5, l6
     private void setCircleButtonLetters() {
+        // Primero ponemos todos los botones visibles
         for (int id : ids) {
             Button button = findViewById(id);
             button.setVisibility(View.VISIBLE);
         }
+        // Los id de los botones los tenemos ordenados para que queden bien
+        // Ponemos las letras en los botones y añadimos el metodo onClick
         int i;
         for (i = 0; i < wordsProvider.getChosenWord().length(); i++) {
             Button bLetter = findViewById(ids[i]);
             bLetter.setOnClickListener(e -> setLetter(bLetter));
             bLetter.setText(new char[]{wordsProvider.getChosenWord().charAt(i)}, 0, 1);
         }
+        // Los botones que sobran los quitamos de la vista con View.GONE
         for (; i < 7; i++) {
             Button button = findViewById(ids[i]);
             button.setVisibility(View.GONE);
         }
     }
 
-    // onClick random button function
+    // Funcion onClick para el boton random
     public void suffle(View view) {
         clear(null);
         Random ran = new Random();
         char[] word = wordsProvider.getChosenWord().toCharArray();
-        // suffle the word
+        // Mezclar la palabra
         for (int i = 0; i < word.length; i++) {
             int j = ran.nextInt(word.length);
             char aux = word[i];
             word[i] = word[j];
             word[j] = aux;
         }
-        // put the suffle word on the buttons
+        // Poner la palabra mezclada en los botones
         for (int i = 0; i < wordsProvider.getChosenWord().length(); i++) {
             Button bLetter = findViewById(ids[i]);
             bLetter.setText(word, i, 1);
@@ -208,7 +209,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void send(View view) {
         boolean found = false;
-        Integer hiddenWordsNumber = wordsProvider.getHiddenWordsNumber();
         TextView textView = findViewById(R.id.textVWordFormation);
         String word = (String) textView.getText();
         if (word.isEmpty()) return;
@@ -216,80 +216,118 @@ public class MainActivity extends AppCompatActivity {
         word = word.toLowerCase();
         clear(null);
         Iterator<Map.Entry<Integer, String>> hiddenIterator = wordsProvider.getHiddenWords().entrySet().iterator();
+        // Miramos si se encuentra en las HiddenWors
         while (hiddenIterator.hasNext()) {
             Map.Entry<Integer, String> entry = hiddenIterator.next();
-            if (Objects.equals(entry.getValue(), word)) {
+            // Si la palabra esta en el conjunto de palabras escondidas
+            if (entry.getValue().equals(word)) {
                 showWord(wordsProvider.getValidWords().get(word), entry.getKey());
                 showMessage("Encertada!", false);
                 wordsProvider.getFound().add(word);
                 updateFoundWords(null);
                 hiddenIterator.remove();
-                hiddenWordsNumber = hiddenWordsNumber - 1;
+                wordsProvider.decreaseHiddenWordsNumber();
                 found = true;
                 break;
             }
         }
+        // Si no se ha encontrado en las HiddenWords miramos si seria una posible solucion
         if (!found) {
             HashSet<String> sol =  wordsProvider.getSolutions().get(word.length());
             if (sol.contains(word)) {
+                // Miramos si la palabra ya la habia puesto antes
                 if (!wordsProvider.getFound().contains(word)) {
+                    // No la habia puesto antes
                     wordsProvider.getFound().add(word);
                     updateFoundWords(null);
                     showMessage("Paraula vàlida! Tens un bonus", false);
                     bonusPoints++;
-                    // si tiene suficientes puntos para bonus se muestra la primera letra de una palabra random.
-                    if (bonusPoints == PUNTOSPARABONUS) {
-                        Random ran = new Random();
-                        int aux = ran.nextInt(hiddenWordsNumber);
-                        Iterator<Map.Entry<Integer, String>> hiddenIteratorAux = wordsProvider.getHiddenWords().entrySet().iterator();
-                        while (hiddenIteratorAux.hasNext() && (aux >= 0)){
-                            Map.Entry<Integer, String> entry = hiddenIterator.next();
-                            if ((aux - 1) == 0) {
-                                showFirstLetter(entry.getValue(), entry.getKey());
-                                break;
-                            }
-                            aux--;
-                        }
-                    }
+                    Button showPointsBonus = findViewById(R.id.buttonBonus);
+                    showPointsBonus.setText(String.valueOf(bonusPoints));
                 } else {
+                    // Ya habia puesto la palabra
                     showMessage("Aquesta ja la tens", false);
                     updateFoundWords(wordsProvider.getValidWords().get(word));
                 }
+                found = true;
             }
         }
+        // Si no es ni una posible solucion
         if (!found) {
             showMessage("Paraula no vàlida", false);
         }
 
+        // Si ya no quedan palabras escondidas significa que las has acertado todas
         if (wordsProvider.getHiddenWords().isEmpty()) {
             showMessage("Enhorabona! has guanyat", true);
             disableViews();
         }
     }
 
+    // Funcion onClick para el boton bonus
     public void bonus(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("encertades i possibles");
-        builder.setMessage("La llista de trobades: \n");
+        builder.setTitle(String.format(
+                "Encertades (%d de %d):",
+                wordsProvider.getNumberOfFound(),
+                wordsProvider.getNumberOfPossibleSolutions()
+        ));
+        StringBuilder foundWords = new StringBuilder();
+        Iterator<String> foundsIterator = wordsProvider.getFound().iterator();
+        while (foundsIterator.hasNext()) {
+            String nextWord = wordsProvider.getValidWords().get(foundsIterator.next());
+            if (foundWords.length() == 0) foundWords.append(nextWord);
+            else {
+                foundWords.append(", ").append(nextWord);
+            }
+        }
+        builder.setMessage(foundWords);
 
-        // OK button for close the window
+        // Boton OK para cerrar la ventana
         builder.setPositiveButton("OK", null);
         AlertDialog dialog = builder.create();
         dialog.show();
     }
 
+    // Funcion onClick para el boton de ayuda
+    public void butonHelp(View view) {
+        // Si tiene suficientes puntos para bonus se muestra la primera letra de una palabra random.
+        int hiddenWordsNumber = wordsProvider.getHiddenWordsNumber();
+        if ((bonusPoints % PUNTOSPARABONUS) == 0) {
+            bonusPoints -= PUNTOSPARABONUS;
+            // Actualitzar el numero del boton
+            Button showPointsBonus = findViewById(R.id.buttonBonus);
+            showPointsBonus.setText(String.valueOf(bonusPoints));
+
+            // Sacar una de las palabras random que están escondidas y poner la primera letra
+            Random ran = new Random();
+            int aux = ran.nextInt(hiddenWordsNumber);
+            Iterator<Map.Entry<Integer, String>> hiddenIteratorAux = wordsProvider.getHiddenWords().entrySet().iterator();
+            while (hiddenIteratorAux.hasNext() && (aux >= 0)){
+                Map.Entry<Integer, String> entry = hiddenIteratorAux.next();
+                if ((aux - 1) == 0) {
+                    showFirstLetter(entry.getValue(), entry.getKey());
+                    break;
+                }
+                aux--;
+            }
+        } else showMessage("No tens punts sufiecients per una ajuda.", false);
+    }
+
+    // Limpia el campo donde se forma la palabra y se resetea el estado de los botones
     public void clear(View view) {
-        //restart buttons
+        // Reseteo de los botones
         for (int i = 0; i < wordsProvider.getChosenWord().length(); i++) {
             Button b = findViewById(ids[i]);
             b.setEnabled(true);
             b.setTextColor(ContextCompat.getColor(this, R.color.white));
         }
-        //clear text view
+
         TextView tv = findViewById(R.id.textVWordFormation);
         tv.setText("");
     }
 
+    // Cambia los colores de la UI dado un nombre de color
     private void setUIColor(String color) {
         ImageView circle = findViewById(R.id.circleView);
         circle.setImageDrawable(drawableColors.get(color)[0]);
@@ -302,6 +340,7 @@ public class MainActivity extends AppCompatActivity {
         textView.setBackgroundColor(buttonColors.get(color)[1]);
     }
 
+    // Muestra la palabra @param word en la posicion @param pos
     private void showWord(String word, int pos) {
         for (int i = 0; i < letterTVId[pos].length; i++) {
             TextView textView = findViewById(letterTVId[pos][i]);
@@ -309,11 +348,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Meuestra la primera letra de la palabra @param word en la posicion @param pos
     private void showFirstLetter(String word, int pos) {
         TextView textView = findViewById(letterTVId[pos][0]);
         textView.setText(String.format("%s", word.charAt(0)).toLowerCase());
     }
 
+    // Muestra un mensaje en un toast por pantalla
     private void showMessage(String message, boolean longTime) {
         int duration;
         if (longTime) duration = Toast.LENGTH_LONG;
@@ -323,6 +364,7 @@ public class MainActivity extends AppCompatActivity {
         toast.show();
     }
 
+    // Metodo para inicializar una partida
     public void startNewGame(View view) {
         enableViews();
         wordsProvider.initializeGameWords();
@@ -344,18 +386,9 @@ public class MainActivity extends AppCompatActivity {
             generateRowTextViews(guidesIds[pair.getKey()], pair.getValue().length(), pair.getKey());
         }
         updateFoundWords(null);
-        /*
-        En aquest apartat s’ha d’implementar la funcionalitat del bot´o reiniciar, que
-        ha de:
-            • Esborrar de la pantalla les caselles de les lletres amagades actuals.
-            • Mostrar les noves paraules amagades.
-            • Reiniciar totes les variables necess`aries per comen¸car una nova partida.
-        Pensau que, de moment, no podem reiniciar totes les coses (encara no tenim
-        les paraules i no es pot determinar quantes ni quines solucions tenim, per`o
-        ho podem simular amb valors constants).
-         */
     }
 
+    // Metodo para activar todos los Views
     private void enableViews() {
         ViewGroup group = findViewById(R.id.main);
         for (int i = 0; i < group.getChildCount(); i++) {
@@ -364,6 +397,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Itera sobre el catalogo de palabras encontradas para mostrarlas por pantalla.
+    // Si se le pasa una palabra por parametro, es porque se sabe que esta va a estar
+    // dentro de este catalogo y se quiere que se muestre en rojo, ya que el usuario ya
+    // la habia encontrado
     public void updateFoundWords(String wordToRed) {
         TextView founds = findViewById(R.id.correctWordsTextView);
         StringBuilder foundWords = new StringBuilder();
@@ -389,18 +426,20 @@ public class MainActivity extends AppCompatActivity {
     private void disableViews() {
         int bonusId = R.id.buttonBonus;
         int resetId = R.id.buttonReset;
-        ViewGroup group = (ViewGroup) findViewById(R.id.main);
+        ViewGroup group = findViewById(R.id.main);
         for (int i = 0; i < group.getChildCount(); i++) {
             View v = group.getChildAt(i);
             if ((v.getId() != bonusId) && (v.getId() != resetId)) v.setEnabled(false);
         }
     }
 
+    // Funcion auxiliar para elegir un color random
     private String pickRandomColor() {
         Random ran = new Random();
         return colors[ran.nextInt(4)];
     }
 
+    // Inicializa la interfaz de usuario con una paleta de colores
     private void initUIColorsAndDrawables() {
         drawableColors.put("YELLOW", new Drawable[]{
                 AppCompatResources.getDrawable(this, R.drawable.circle_yellow),

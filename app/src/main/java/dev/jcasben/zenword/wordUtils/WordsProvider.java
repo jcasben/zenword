@@ -24,20 +24,26 @@ public class WordsProvider {
     private TreeMap<Integer, String> hiddenWords;
     // El catàleg de les solucions trobades.
     private TreeSet<String> found;
-    // El cat`aleg de les lletres disponibles: n´umero d’aparicions de cada lletra a la paraula triada, per determinar
+    // El catàleg de les lletres disponibles: n´umero d’aparicions de cada lletra a la paraula triada, per determinar
     // si una paraula es pot formar amb les lletres disponibles (´es a dir, si ´es una soluci´o possible).
     private UnsortedArrayMapping<Character, Integer> availableLetters;
 
+    // Contadores para saber cuantas palabras del diccionario hay para cada longitud
     private final int[] sizes = new int[5];
+    // Contadores para saber cuantas posibles soluciones hay de cada letra
     private int[] sizesSolutions = new int[5];
+    // Contador que permite saber cuantas palabras escondidas quedan por descubrir
     private Integer hiddenWordsNumber = 5;
+    // Longitud de la palabra elegida con rango: [3,7]
     private int wordLength;
+    // Palabra elegida aleatoriamente de longitud wordlength
     private String chosenWord;
 
     public WordsProvider(InputStream stream) {
         initWordsLengths(stream);
     }
 
+    // Lee el fichero e inicializa los catalogos y los contadores de tamaños
     private void initWordsLengths(InputStream stream) {
         for (int i = 3; i < 8; i++) {
             wordsLengths.put(i, new HashSet<>());
@@ -61,6 +67,7 @@ public class WordsProvider {
         }
     }
 
+    //Inicializa todas las varibles necesarias para poder jugar una partida nueva
     public void initializeGameWords() {
         hiddenWords = new TreeMap<>();
         found = new TreeSet<>(Comparator.comparingInt(String::length).thenComparing(Comparator.naturalOrder()));
@@ -71,6 +78,7 @@ public class WordsProvider {
         generateHiddenWords();
     }
 
+    // Genera el catalogo de palabras escondidas.
     private void generateHiddenWords() {
         Comparator<String> comparator =
                 Comparator.comparingInt(String::length).thenComparing(Comparator.naturalOrder());
@@ -100,7 +108,7 @@ public class WordsProvider {
         aux.add(chosenWord);
 
         int pos = 3;
-
+        // Rellena con palabras de 3
         for (int i = wordLength - 1; i > 3; i--) {
             if (sizesSolutions[i - 3] > 0) {
                 int random = ran.nextInt(sizesSolutions[i - 3]);
@@ -157,9 +165,40 @@ public class WordsProvider {
         Log.i("testHidden", "--------------------------------------");
     }
 
-    public HashMap<Integer, HashSet<String>> getWordsLengths() {
-        return wordsLengths;
+    private boolean isSolutionWord(String word1, String word2) {
+        availableLetters = new UnsortedArrayMapping<>(word1.length());
+        // Generar el catálogo de word1
+        for (int i = 0; i < word1.length(); i++) {
+            Integer v = availableLetters.put(word1.charAt(i), 1);
+            if (v != null) {
+                availableLetters.put(word1.charAt(i), v + 1);
+            }
+        }
+
+        // Comprobar si word2 podría estar generada con el catálogo
+        for (int i = 0; i < word2.length(); i++) {
+            Integer value = availableLetters.get(word2.charAt(i));
+            if (value == null || value == 0) return false;
+            availableLetters.put(word2.charAt(i), value - 1);
+        }
+        // Si se llega a este return es porque word2 se puede formar con las letras de word1
+        return true;
     }
+
+    private void pickWord() {
+        // Selecciona la palabra elegida
+        Random random = new Random();
+        wordLength = random.nextInt(5) + 3;
+        Iterator<String> iterator = wordsLengths.get(wordLength).iterator();
+        int numWord = random.nextInt(sizes[wordLength - 3]);
+        int i = 0;
+        while (i <= numWord && iterator.hasNext()) {
+            chosenWord = iterator.next();
+            i++;
+        }
+    }
+
+    // ---------------------------------- GETTERS AND SETTERS ----------------------------------
 
     public TreeMap<Integer, String> getHiddenWords() {
         return hiddenWords;
@@ -178,6 +217,10 @@ public class WordsProvider {
     }
 
     public Integer getHiddenWordsNumber() { return hiddenWordsNumber;}
+
+    public void decreaseHiddenWordsNumber() {
+        hiddenWordsNumber--;
+    }
 
     public HashMap<String, String> getValidWords() {
         return validWords;
@@ -201,37 +244,5 @@ public class WordsProvider {
         }
 
         return nfound;
-    }
-
-    private boolean isSolutionWord(String word1, String word2) {
-        availableLetters = new UnsortedArrayMapping<>(word1.length());
-        // generate the catalogue of word 1
-        for (int i = 0; i < word1.length(); i++) {
-            Integer v = availableLetters.put(word1.charAt(i), 1);
-            if (v != null) {
-                availableLetters.put(word1.charAt(i), v + 1);
-            }
-        }
-
-        // check if word2 could be generated with the catalogue
-        for (int i = 0; i < word2.length(); i++) {
-            Integer value = availableLetters.get(word2.charAt(i));
-            if (value == null || value == 0) return false;
-            availableLetters.put(word2.charAt(i), value - 1);
-        }
-        // if the program arrives here is because word 2 can be formed with the letters of word1
-        return true;
-    }
-
-    private void pickWord() {
-        Random random = new Random();
-        wordLength = random.nextInt(5) + 3;
-        Iterator<String> iterator = wordsLengths.get(wordLength).iterator();
-        int numWord = random.nextInt(sizes[wordLength - 3]);
-        int i = 0;
-        while (i <= numWord && iterator.hasNext()) {
-            chosenWord = iterator.next();
-            i++;
-        }
     }
 }
