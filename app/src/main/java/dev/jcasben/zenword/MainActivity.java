@@ -5,6 +5,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -40,13 +41,10 @@ public class MainActivity extends AppCompatActivity {
             new UnsortedArrayMapping<>(4);
     private int[][] letterTVId;
     private final String[] colors = {"YELLOW", "GREEN", "RED", "ORANGE"};
-
     private Drawable letterBackground;
     private int widthDisplay;
-
     private final int PUNTOSPARABONUS = 5;
     private int bonusPoints = 0;
-
     private WordsProvider wordsProvider;
 
     @Override
@@ -165,7 +163,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     // Nombre de los botones: l0, l1, l2, l3, l4, l5, l6
     private void setCircleButtonLetters() {
         // Primero ponemos todos los botones visibles
@@ -216,45 +213,51 @@ public class MainActivity extends AppCompatActivity {
         word = word.toLowerCase();
         clear(null);
         Iterator<Map.Entry<Integer, String>> hiddenIterator = wordsProvider.getHiddenWords().entrySet().iterator();
-        // Miramos si se encuentra en las HiddenWors
-        while (hiddenIterator.hasNext()) {
-            Map.Entry<Integer, String> entry = hiddenIterator.next();
-            // Si la palabra esta en el conjunto de palabras escondidas
-            if (entry.getValue().equals(word)) {
-                showWord(wordsProvider.getValidWords().get(word), entry.getKey());
-                showMessage("Encertada!", false);
-                wordsProvider.getFound().add(word);
-                updateFoundWords(null);
-                hiddenIterator.remove();
-                wordsProvider.decreaseHiddenWordsNumber();
-                found = true;
-                break;
-            }
-        }
-        // Si no se ha encontrado en las HiddenWords miramos si seria una posible solucion
-        if (!found) {
-            HashSet<String> sol =  wordsProvider.getSolutions().get(word.length());
-            if (sol.contains(word)) {
-                // Miramos si la palabra ya la habia puesto antes
-                if (!wordsProvider.getFound().contains(word)) {
-                    // No la habia puesto antes
+
+        if (word.length() >= 3) {
+            // Miramos si se encuentra en las HiddenWors
+            while (hiddenIterator.hasNext()) {
+                Map.Entry<Integer, String> entry = hiddenIterator.next();
+                // Si la palabra esta en el conjunto de palabras escondidas
+                if (entry.getValue().equals(word)) {
+                    showWord(wordsProvider.getValidWords().get(word), entry.getKey());
+                    showMessage("Encertada!", false);
                     wordsProvider.getFound().add(word);
                     updateFoundWords(null);
-                    showMessage("Paraula vàlida! Tens un bonus", false);
-                    bonusPoints++;
-                    Button showPointsBonus = findViewById(R.id.buttonBonus);
-                    showPointsBonus.setText(String.valueOf(bonusPoints));
-                } else {
-                    // Ya habia puesto la palabra
-                    showMessage("Aquesta ja la tens", false);
-                    updateFoundWords(wordsProvider.getValidWords().get(word));
+                    hiddenIterator.remove();
+                    wordsProvider.getWithoutBonus().remove(entry.getKey());
+                    wordsProvider.decreaseHiddenWordsNumber();
+                    wordsProvider.decreaseRemainingWordsBonus();
+                    found = true;
+                    break;
                 }
-                found = true;
+            }
+            // Si no se ha encontrado en las HiddenWords miramos si seria una posible solucion
+            if (!found) {
+                HashSet<String> sol = wordsProvider.getSolutions().get(word.length());
+                if (sol.contains(word)) {
+                    // Miramos si la palabra ya la habia puesto antes
+                    if (!wordsProvider.getFound().contains(word)) {
+                        // No la habia puesto antes
+                        wordsProvider.getFound().add(word);
+                        updateFoundWords(null);
+                        showMessage("Paraula vàlida! Tens un bonus", false);
+                        bonusPoints++;
+                        Button showPointsBonus = findViewById(R.id.buttonBonus);
+                        showPointsBonus.setText(String.valueOf(bonusPoints));
+                    } else {
+                        // Ya habia puesto la palabra
+                        showMessage("Aquesta ja la tens", false);
+                        updateFoundWords(wordsProvider.getValidWords().get(word));
+                    }
+                    found = true;
+                }
             }
         }
         // Si no es ni una posible solucion
         if (!found) {
             showMessage("Paraula no vàlida", false);
+            return;
         }
 
         // Si ya no quedan palabras escondidas significa que las has acertado todas
@@ -292,26 +295,36 @@ public class MainActivity extends AppCompatActivity {
     // Funcion onClick para el boton de ayuda
     public void butonHelp(View view) {
         // Si tiene suficientes puntos para bonus se muestra la primera letra de una palabra random.
-        int hiddenWordsNumber = wordsProvider.getHiddenWordsNumber();
-        if ((bonusPoints % PUNTOSPARABONUS) == 0) {
-            bonusPoints -= PUNTOSPARABONUS;
-            // Actualitzar el numero del boton
-            Button showPointsBonus = findViewById(R.id.buttonBonus);
-            showPointsBonus.setText(String.valueOf(bonusPoints));
+        int hiddenWordsNumber = wordsProvider.getRemainingWordsBonus();
 
-            // Sacar una de las palabras random que están escondidas y poner la primera letra
-            Random ran = new Random();
-            int aux = ran.nextInt(hiddenWordsNumber);
-            Iterator<Map.Entry<Integer, String>> hiddenIteratorAux = wordsProvider.getHiddenWords().entrySet().iterator();
-            while (hiddenIteratorAux.hasNext() && (aux >= 0)){
-                Map.Entry<Integer, String> entry = hiddenIteratorAux.next();
-                if ((aux - 1) == 0) {
-                    showFirstLetter(entry.getValue(), entry.getKey());
-                    break;
-                }
-                aux--;
+        if (bonusPoints < PUNTOSPARABONUS) {
+            showMessage("No tens punts sufiecients per una ajuda!", false);
+            return;
+        } else if (hiddenWordsNumber <= 0) {
+            showMessage("Ja has emprat totes les ajudes possibles!", false);
+            return;
+        }
+
+        bonusPoints -= PUNTOSPARABONUS;
+        // Actualitzar el numero del boton
+        Button showPointsBonus = findViewById(R.id.buttonBonus);
+        showPointsBonus.setText(String.valueOf(bonusPoints));
+
+        // Sacar una de las palabras random que están escondidas y poner la primera letra
+        Random ran = new Random();
+        int aux = ran.nextInt(hiddenWordsNumber);
+        //while (givenBonus.contains(aux)) aux = ran.nextInt(hiddenWordsNumber);
+        Iterator<Map.Entry<Integer, String>> withoutBonusIterator = wordsProvider.getWithoutBonus().entrySet().iterator();
+        while (withoutBonusIterator.hasNext() && (aux >= 0)) {
+            Map.Entry<Integer, String> entry = withoutBonusIterator.next();
+            if (aux == 0) {
+                showFirstLetter(entry.getValue(), entry.getKey());
+                wordsProvider.getWithoutBonus().remove(entry.getKey());
+                wordsProvider.decreaseRemainingWordsBonus();
+                break;
             }
-        } else showMessage("No tens punts sufiecients per una ajuda.", false);
+            aux--;
+        }
     }
 
     // Limpia el campo donde se forma la palabra y se resetea el estado de los botones
@@ -369,7 +382,9 @@ public class MainActivity extends AppCompatActivity {
         enableViews();
         wordsProvider.initializeGameWords();
         if (letterTVId != null) removeTextViews();
-        setUIColor(pickRandomColor());
+        bonusPoints = 0;
+        setUIColor(pickRandomColor());Button showPointsBonus = findViewById(R.id.buttonBonus);
+        showPointsBonus.setText(String.valueOf(bonusPoints));
         setCircleButtonLetters();
         suffle(null);
 
@@ -386,6 +401,11 @@ public class MainActivity extends AppCompatActivity {
             generateRowTextViews(guidesIds[pair.getKey()], pair.getValue().length(), pair.getKey());
         }
         updateFoundWords(null);
+        Iterator<UnsortedArrayMapping.Pair<Integer, HashSet<String>>> iterator = wordsProvider.getSolutions().iterator();
+        while (iterator.hasNext()) {
+            UnsortedArrayMapping.Pair<Integer, HashSet<String>> pair = iterator.next();
+            Log.i("test", pair.getKey() + " " + pair.getValue());
+        }
     }
 
     // Metodo para activar todos los Views
