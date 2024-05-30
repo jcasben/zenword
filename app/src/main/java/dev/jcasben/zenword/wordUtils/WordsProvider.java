@@ -22,6 +22,7 @@ public class WordsProvider {
     // pantalla. Una vegada que l’usuari descobreix una de les paraules ocultes, aquesta ja no ha de formar part del catàleg
     //private final UnsortedArrayMapping<Integer, String> hiddenWords = new UnsortedArrayMapping<>(5);
     private TreeMap<Integer, String> hiddenWords;
+    private TreeMap<Integer, String> withoutBonus;
     // El catàleg de les solucions trobades.
     private TreeSet<String> found;
     // El catàleg de les lletres disponibles: n´umero d’aparicions de cada lletra a la paraula triada, per determinar
@@ -33,7 +34,8 @@ public class WordsProvider {
     // Contadores para saber cuantas posibles soluciones hay de cada letra
     private int[] sizesSolutions = new int[5];
     // Contador que permite saber cuantas palabras escondidas quedan por descubrir
-    private Integer hiddenWordsNumber = 5;
+    private Integer hiddenWordsNumber = 0;
+    private Integer remainingWordsBonus = 0;
     // Longitud de la palabra elegida con rango: [3,7]
     private int wordLength;
     // Palabra elegida aleatoriamente de longitud wordlength
@@ -76,6 +78,7 @@ public class WordsProvider {
         sizesSolutions = new int[5];
         pickWord();
         generateHiddenWords();
+        withoutBonus = (TreeMap<Integer, String>) hiddenWords.clone();
     }
 
     // Genera el catalogo de palabras escondidas.
@@ -89,6 +92,9 @@ public class WordsProvider {
         for (int i = 3; i < 8; i++) {
             solutions.put(i, new HashSet<>());
         }
+
+        hiddenWordsNumber = 0;
+        remainingWordsBonus = 0;
 
         //Para cada tamaño de la palabra
         Iterator<Map.Entry<Integer, HashSet<String>>> lengthsIterator = wordsLengths.entrySet().iterator();
@@ -108,7 +114,6 @@ public class WordsProvider {
         aux.add(chosenWord);
 
         int pos = 3;
-        // Rellena con palabras de 3
         for (int i = wordLength - 1; i > 3; i--) {
             if (sizesSolutions[i - 3] > 0) {
                 int random = ran.nextInt(sizesSolutions[i - 3]);
@@ -128,6 +133,7 @@ public class WordsProvider {
         int tam = sizesSolutions[0];
         Log.i("testHidden", "Cantidad de palabras de 3letras: " + tam);
 
+        // Rellena con palabras de 3
         if (tam >= 0) {
             int count3 = 0;
             HashSet<Integer> accessed = new HashSet<>();
@@ -157,6 +163,8 @@ public class WordsProvider {
         Iterator<String> auxIterator = aux.iterator();
         while (auxIterator.hasNext()) {
             hiddenWords.put(j, auxIterator.next());
+            hiddenWordsNumber++;
+            remainingWordsBonus++;
             j++;
         }
 
@@ -218,8 +226,20 @@ public class WordsProvider {
 
     public Integer getHiddenWordsNumber() { return hiddenWordsNumber;}
 
+    public TreeMap<Integer, String> getWithoutBonus() {
+        return withoutBonus;
+    }
+
     public void decreaseHiddenWordsNumber() {
         hiddenWordsNumber--;
+    }
+
+    public Integer getRemainingWordsBonus() {
+        return remainingWordsBonus;
+    }
+
+    public void decreaseRemainingWordsBonus() {
+        remainingWordsBonus--;
     }
 
     public HashMap<String, String> getValidWords() {
