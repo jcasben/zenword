@@ -1,4 +1,4 @@
-package dev.jcasben.zenword.wordUtils;
+package dev.jcasben.zenword;
 
 import android.util.Log;
 

@@ -25,8 +25,6 @@ import androidx.core.content.ContextCompat;
 
 import dev.jcasben.zenword.mappings.UnsortedArrayMapping;
 
-import dev.jcasben.zenword.wordUtils.WordsProvider;
-
 import java.util.*;
 
 public class MainActivity extends AppCompatActivity {
