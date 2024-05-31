@@ -5,7 +5,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -402,7 +401,6 @@ public class MainActivity extends AppCompatActivity {
         Iterator<UnsortedArrayMapping.Pair<Integer, HashSet<String>>> iterator = wordsProvider.getSolutions().iterator();
         while (iterator.hasNext()) {
             UnsortedArrayMapping.Pair<Integer, HashSet<String>> pair = iterator.next();
-            Log.i("test", pair.getKey() + " " + pair.getValue());
         }
     }
 

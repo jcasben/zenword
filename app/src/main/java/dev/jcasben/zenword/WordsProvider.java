@@ -1,7 +1,5 @@
 package dev.jcasben.zenword;
 
-import android.util.Log;
-
 import dev.jcasben.zenword.mappings.UnsortedArrayMapping;
 
 import java.io.BufferedReader;
@@ -28,7 +26,6 @@ public class WordsProvider {
     // El catàleg de les lletres disponibles: n´umero d’aparicions de cada lletra a la paraula triada, per determinar
     // si una paraula es pot formar amb les lletres disponibles (´es a dir, si ´es una soluci´o possible).
     private UnsortedArrayMapping<Character, Integer> availableLetters;
-
     // Contadores para saber cuantas palabras del diccionario hay para cada longitud
     private final int[] sizes = new int[5];
     // Contadores para saber cuantas posibles soluciones hay de cada letra
@@ -72,7 +69,7 @@ public class WordsProvider {
     //Inicializa todas las varibles necesarias para poder jugar una partida nueva
     public void initializeGameWords() {
         hiddenWords = new TreeMap<>();
-        found = new TreeSet<>(Comparator.comparingInt(String::length).thenComparing(Comparator.naturalOrder()));
+        found = new TreeSet<>();
         availableLetters = new UnsortedArrayMapping<>(7);
         solutions = new UnsortedArrayMapping<>(5);
         sizesSolutions = new int[5];
@@ -114,16 +111,16 @@ public class WordsProvider {
         aux.add(chosenWord);
 
         int pos = 3;
-        for (int i = wordLength - 1; i > 3; i--) {
+        for (int i = (wordLength - 1); i > 3; i--) {
             if (sizesSolutions[i - 3] > 0) {
                 int random = ran.nextInt(sizesSolutions[i - 3]);
                 String hiddenWord = "";
                 Iterator<String> hiddenIterator = solutions.get(i).iterator();
-                while (hiddenIterator.hasNext() && random > 0) {
+                while (hiddenIterator.hasNext() && random >= 0) {
                     hiddenWord = hiddenIterator.next();
                     random--;
                 }
-                if (!Objects.equals(hiddenWord, "")) {
+                if (!hiddenWord.isEmpty()) {
                     aux.add(hiddenWord);
                     pos--;
                 }
@@ -131,7 +128,6 @@ public class WordsProvider {
         }
 
         int tam = sizesSolutions[0];
-        Log.i("testHidden", "Cantidad de palabras de 3letras: " + tam);
 
         // Rellena con palabras de 3
         if (tam >= 0) {
@@ -141,7 +137,6 @@ public class WordsProvider {
                 String hiddenWord = "";
                 ran = new Random();
                 int randomNumber = ran.nextInt(sizesSolutions[0]);
-                Log.i("testHidden", "Numero random " + randomNumber);
                 Iterator<String> hidenIterator = solutions.get(3).iterator();
                 // Con este if nos ahorramos tener que sacar la palabra antes de mirar si ya habia salido esa misma
                 // palabra antes.
@@ -154,8 +149,6 @@ public class WordsProvider {
                     count3++;
                     aux.add(hiddenWord);
                 }
-
-                Log.i("testHidden", "Hidden word:" + hiddenWord);
             }
         }
 
@@ -167,10 +160,6 @@ public class WordsProvider {
             remainingWordsBonus++;
             j++;
         }
-
-        Log.i("test", "ChosenWord = " + chosenWord);
-        Log.i("test", hiddenWords.toString());
-        Log.i("testHidden", "--------------------------------------");
     }
 
     private boolean isSolutionWord(String word1, String word2) {
