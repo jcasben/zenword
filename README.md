@@ -10,9 +10,9 @@ using Android Studio and with the collaboration of [Marc Link](https://github.co
 ## 🎮 Gameplay
 
 When you open the app, you will see the main screen, where the game is played.
-<div style="display: center">
-    <img src="main-screen.png" alt="main screen of the game" width="520" height="540"/>
-</div>
+<p align="center">
+    <img src="main-screen.png" alt="main screen of the game" width="620" height="640"/>
+</p>
 
 ## 🔨 How to try it
 
