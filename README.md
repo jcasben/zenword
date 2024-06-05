@@ -7,6 +7,12 @@ intention of inducing some kind of "relaxation" using zen backgrounds and smooth
 This project was developed for the final project of the course Algorithms and Data Structures II 
 using Android Studio and with the collaboration of [Marc Link](https://github.com/linkcla).
 
+## 🎮 Gameplay
+
+When you open the app, you will see the main screen, where the game is played.
+
+![main-screen](main-screen.png)
+
 ## 🔨 How to try it
 
 To try our game, you have two options:
@@ -16,7 +22,7 @@ To try our game, you have two options:
 - Clone our repository with the following command:
 
 ```
-git clone https://github.com/jcasben/PuzzleGame.git
+https://github.com/jcasben/zenword.git
 ```
 
 - Open the cloned directory with Android Studio
