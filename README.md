@@ -11,7 +11,7 @@ using Android Studio and with the collaboration of [Marc Link](https://github.co
 
 When you open the app, you will see the main screen, where the game is played.
 
-![main-screen](main-screen.png)
+<img src="main-screen.png" alt="main screen of the game" />
 
 ## 🔨 How to try it
 
