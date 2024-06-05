@@ -11,7 +11,7 @@ using Android Studio and with the collaboration of [Marc Link](https://github.co
 
 When you open the app, you will see the main screen, where the game is played.
 <p align="center">
-    <img src="main-screen.png" alt="main screen of the game" width="620" height="640"/>
+    <img src="main-screen.png" alt="main screen of the game" width="620" height="650"/>
 </p>
 
 ## 🔨 How to try it
